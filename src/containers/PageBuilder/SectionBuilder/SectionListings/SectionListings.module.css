@@ -172,14 +172,26 @@
 }
 
 .carouselImageHoverEffect {
-  transition: var(--transitionStyleButton);
+  transition: var(--transitionStyleButton), transform 300ms cubic-bezier(0.2, 0.8, 0.2, 1);
   background: var(--colorGrey100);
   border-radius: var(--borderRadiusMedium);
+  overflow: hidden;
 
   @media (--viewportMedium) {
     &:hover {
       box-shadow: var(--boxShadowFeaturedListingCard);
       filter: brightness(1.05) contrast(1.05);
+      transform: scale(1.02);
+    }
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .carouselImageHoverEffect {
+    transition: none;
+
+    &:hover {
+      transform: none;
     }
   }
 }

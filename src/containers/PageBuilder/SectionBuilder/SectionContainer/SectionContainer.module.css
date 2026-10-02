@@ -23,9 +23,29 @@
   padding: 32px 0;
   position: relative;
   word-break: break-word;
+  opacity: 1;
+  transform: translateY(0);
+  transition: opacity 700ms cubic-bezier(0.2, 0.8, 0.2, 1),
+    transform 700ms cubic-bezier(0.2, 0.8, 0.2, 1);
 
   @media (--viewportMedium) {
     padding: 64px 0;
+  }
+}
+
+.sectionContentHidden {
+  opacity: 0;
+  transform: translateY(32px);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sectionContent {
+    transition: none;
+  }
+
+  .sectionContentHidden {
+    opacity: 1;
+    transform: none;
   }
 }
 

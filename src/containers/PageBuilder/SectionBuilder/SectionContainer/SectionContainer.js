@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import classNames from 'classnames';
 
 import Field from '../../Field';
@@ -10,6 +10,51 @@ import css from './SectionContainer.module.css';
  * @property {ReactNode} component
  * @property {Function} pickValidProps
  */
+
+/**
+ * Reveals this section's content with a subtle fade/slide-up animation the
+ * first time it scrolls into view, giving the page a more premium, "alive"
+ * feel. Content already visible on initial load (e.g. the hero) is never
+ * hidden, so there's no flash of invisible content and nothing breaks for
+ * users without JavaScript or with reduced-motion preferences.
+ */
+const useScrollReveal = () => {
+  const ref = useRef(null);
+  const [isRevealed, setIsRevealed] = useState(true);
+
+  useEffect(() => {
+    const node = ref.current;
+    const prefersReducedMotion =
+      typeof window !== 'undefined' &&
+      window.matchMedia &&
+      window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    if (!node || typeof IntersectionObserver === 'undefined' || prefersReducedMotion) {
+      return undefined;
+    }
+
+    const rect = node.getBoundingClientRect();
+    const alreadyVisible = rect.top < window.innerHeight && rect.bottom > 0;
+    if (alreadyVisible) {
+      return undefined;
+    }
+
+    setIsRevealed(false);
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setIsRevealed(true);
+          observer.unobserve(node);
+        }
+      },
+      { threshold: 0.12, rootMargin: '0px 0px -10% 0px' }
+    );
+    observer.observe(node);
+    return () => observer.disconnect();
+  }, []);
+
+  return [ref, isRevealed];
+};
 
 /**
  * This component can be used to wrap some common styles and features of Section-level components.
@@ -31,6 +76,7 @@ const SectionContainer = props => {
   const { className, rootClassName, id, as, children, appearance, options, ...otherProps } = props;
   const Tag = as || 'section';
   const classes = classNames(rootClassName || css.root, className);
+  const [revealRef, isRevealed] = useScrollReveal();
 
   return (
     <Tag className={classes} id={id} {...otherProps}>
@@ -42,7 +88,12 @@ const SectionContainer = props => {
         />
       ) : null}
 
-      <div className={css.sectionContent}>{children}</div>
+      <div
+        ref={revealRef}
+        className={classNames(css.sectionContent, { [css.sectionContentHidden]: !isRevealed })}
+      >
+        {children}
+      </div>
     </Tag>
   );
 };

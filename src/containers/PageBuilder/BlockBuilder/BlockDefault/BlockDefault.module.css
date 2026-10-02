@@ -1,10 +1,48 @@
 .root {
+  transition: transform 300ms cubic-bezier(0.2, 0.8, 0.2, 1);
+
+  &:hover {
+    transform: translateY(-4px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .root {
+    transition: none;
+
+    &:hover {
+      transform: none;
+    }
+  }
 }
 
 .media {
   width: 100%;
   border-radius: 8px;
   margin-bottom: 0;
+  overflow: hidden;
+
+  & img,
+  & picture {
+    transition: transform 500ms cubic-bezier(0.2, 0.8, 0.2, 1);
+  }
+
+  &:hover img,
+  &:hover picture {
+    transform: scale(1.06);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .media img,
+  .media picture {
+    transition: none;
+  }
+
+  .media:hover img,
+  .media:hover picture {
+    transform: none;
+  }
 }
 
 .text {

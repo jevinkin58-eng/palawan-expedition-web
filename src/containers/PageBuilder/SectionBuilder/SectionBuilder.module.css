@@ -135,31 +135,62 @@
 .ctaButton {
   composes: align;
   display: inline-block;
-  padding: 8px 20px;
+  padding: 10px 24px;
   font-size: 15px;
   background-color: var(--marketplaceColor);
-  border-radius: 4px;
+  border-radius: 6px;
   color: white;
   text-decoration: none;
   box-shadow: 0 8px 16px 0 rgb(0 0 0 / 20%);
-  font-weight: 500;
+  font-weight: 600;
+  letter-spacing: 0.01em;
   margin-top: 24px;
+  transition: transform 220ms cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 220ms ease,
+    background-color 220ms ease;
+  will-change: transform;
 
   &:hover {
     text-decoration: none;
     background-color: var(--marketplaceColorDark);
+    transform: translateY(-2px);
+    box-shadow: 0 14px 24px 0 rgb(0 0 0 / 25%);
+  }
+
+  &:active {
+    transform: translateY(0);
+    box-shadow: 0 8px 16px 0 rgb(0 0 0 / 20%);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ctaButton {
+    transition: background-color 220ms ease;
+
+    &:hover {
+      transform: none;
+    }
   }
 }
 
 .defaultLink {
   display: inline;
   color: var(--marketplaceColor);
+  background-image: linear-gradient(currentColor, currentColor);
+  background-position: 0 100%;
+  background-repeat: no-repeat;
+  background-size: 0% 1px;
+  transition: background-size 220ms ease;
 
   /* fallback option */
   word-break: break-all;
   /* use break-word if available */
   word-break: break-word;
   hyphens: auto;
+
+  &:hover {
+    text-decoration: none;
+    background-size: 100% 1px;
+  }
 }
 
 /**
@@ -196,11 +227,12 @@
 /* ************************************ */
 .darkTheme .defaultLink {
   color: white;
-  text-decoration: underline;
+  background-size: 100% 1px;
 
   &:hover {
     text-decoration: none;
     color: var(--marketplaceColorLight);
+    background-size: 100% 1px;
   }
 }
 
