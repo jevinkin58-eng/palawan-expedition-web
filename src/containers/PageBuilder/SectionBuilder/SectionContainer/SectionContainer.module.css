@@ -7,16 +7,30 @@
   width: 100%;
   position: relative;
 
-  /* Alternate plain white sections with a soft, travel-inspired gradient
-     tint, so the page reads as designed rather than one flat color start
-     to finish. A section with its own custom background image/color
-     (customAppearance) simply paints over this - see .backgroundImageWrapper. */
+  /* Alternate plain white sections with a soft wash of the marketplace's
+     own theme color, so the page reads as designed rather than one flat
+     color start to finish - and so the accent always matches whatever
+     brand color is set in Console, not a fixed palette. A section with its
+     own custom background image/color (customAppearance) simply paints
+     over this - see .backgroundImageWrapper. */
   &:nth-of-type(odd) {
     background-color: var(--colorWhite);
   }
 
   &:nth-of-type(even) {
+    /* Fallback for browsers without color-mix() support */
     background-image: linear-gradient(160deg, #fff7ed 0%, #eef7f6 60%, #eaf3fb 100%);
+  }
+
+  @supports (background: color-mix(in srgb, red 50%, white)) {
+    &:nth-of-type(even) {
+      background-image: linear-gradient(
+        160deg,
+        color-mix(in srgb, var(--marketplaceColor) 5%, white) 0%,
+        color-mix(in srgb, var(--marketplaceColor) 14%, white) 55%,
+        color-mix(in srgb, var(--marketplaceColor) 8%, white) 100%
+      );
+    }
   }
 
   &[id] {

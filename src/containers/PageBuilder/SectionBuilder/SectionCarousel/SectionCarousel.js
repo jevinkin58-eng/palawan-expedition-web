@@ -144,12 +144,12 @@ const SectionCarousel = props => {
     <SectionContainer
       id={sectionId}
       className={className}
-      rootClassName={rootClassName}
+      rootClassName={classNames(css.showcaseRoot, rootClassName)}
       appearance={appearance}
       options={fieldOptions}
     >
       {hasHeaderFields ? (
-        <header className={defaultClasses.sectionDetails}>
+        <header className={classNames(defaultClasses.sectionDetails, css.showcaseHeader)}>
           <Field data={title} className={defaultClasses.title} options={fieldOptions} />
           <Field data={description} className={defaultClasses.description} options={fieldOptions} />
           <Field data={callToAction} className={defaultClasses.ctaButton} options={fieldOptions} />
@@ -169,7 +169,7 @@ const SectionCarousel = props => {
               ›
             </button>
           </div>
-          <div className={getColumnCSS(numColumns)} id={sliderId}>
+          <div className={classNames(getColumnCSS(numColumns), css.showcaseTrack)} id={sliderId}>
             <BlockBuilder
               rootClassName={css.block}
               ctaButtonClass={defaultClasses.ctaButton}
