@@ -1,5 +1,106 @@
 @import '../../../../styles/customMediaQueries.css';
 
+/* ========================================================================
+   "Showcase" treatment - the one bold, fun, standout section on the page.
+   Built from the marketplace's own --marketplaceColor so it always matches
+   the real brand color instead of a fixed palette, while still reading as
+   something more alive than a plain flat background.
+   ======================================================================== */
+.showcaseRoot {
+  position: relative;
+  width: 100%;
+  overflow: hidden;
+
+  /* Fallback for browsers without color-mix() support */
+  background-color: var(--marketplaceColor);
+
+  @supports (background: color-mix(in srgb, red 50%, black)) {
+    background-image: linear-gradient(
+      135deg,
+      color-mix(in srgb, var(--marketplaceColor) 90%, black) 0%,
+      var(--marketplaceColor) 45%,
+      color-mix(in srgb, var(--marketplaceColor) 55%, white) 100%
+    );
+  }
+
+  &[id] {
+    scroll-margin-top: var(--topbarHeight);
+    @media (--viewportMedium) {
+      scroll-margin-top: var(--topbarHeightDesktop);
+    }
+  }
+
+  /* Soft glowing blobs for depth - purely decorative, CSS-only */
+  &::before,
+  &::after {
+    content: '';
+    position: absolute;
+    z-index: 0;
+    border-radius: 50%;
+    filter: blur(50px);
+    pointer-events: none;
+  }
+
+  &::before {
+    width: 280px;
+    height: 280px;
+    top: -90px;
+    right: -70px;
+    background-color: rgba(255, 255, 255, 0.35);
+  }
+
+  &::after {
+    width: 340px;
+    height: 340px;
+    bottom: -130px;
+    left: -90px;
+    background-color: rgba(0, 0, 0, 0.22);
+  }
+
+  /* Make sure real content always sits above the decorative blobs */
+  & > * {
+    position: relative;
+    z-index: 1;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    color: var(--colorWhite);
+  }
+
+  p,
+  li {
+    color: rgba(255, 255, 255, 0.88);
+  }
+}
+
+.showcaseHeader {
+  padding-top: 16px;
+
+  & a,
+  & button {
+    background-color: var(--colorWhite);
+    color: var(--marketplaceColor);
+    box-shadow: 0 12px 28px 0 rgba(0, 0, 0, 0.28);
+
+    &:hover {
+      background-color: var(--colorWhite);
+      color: var(--marketplaceColorDark);
+    }
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .showcaseRoot::before,
+  .showcaseRoot::after {
+    display: none;
+  }
+}
+
 .carouselContainer {
   display: flex;
   position: relative;
@@ -45,17 +146,18 @@
   border-radius: 100%;
   border: none;
 
-  background-color: lightgrey;
+  background-color: var(--colorWhite);
   opacity: 0.9;
   font-size: 30px;
-  color: black;
+  color: var(--marketplaceColor);
+  box-shadow: 0 8px 20px 0 rgba(0, 0, 0, 0.3);
   transition: all ease-in-out 100ms;
 
   &:hover {
     opacity: 1;
     cursor: pointer;
-    background: black;
-    color: white;
+    background: var(--marketplaceColorDark);
+    color: var(--colorWhite);
   }
 }
 
@@ -85,6 +187,7 @@
   scrollbar-width: none;
   scroll-snap-type: x mandatory;
   scroll-behavior: smooth;
+  counter-reset: showcaseCount;
 
   &::-webkit-scrollbar {
     display: none;
@@ -192,6 +295,68 @@
 
     &:hover {
       transform: none;
+    }
+  }
+}
+
+/* "Polaroid" showcase treatment for each listing card: a playful scattered
+   tilt, a numbered badge, and a bigger pop-and-straighten on hover. Uses the
+   standalone `rotate`/`scale`/`translate` properties (not `transform`) so
+   none of the positioning math above is touched. */
+.card {
+  position: relative;
+  counter-increment: showcaseCount;
+  border-radius: 20px;
+  box-shadow: 0 16px 36px -14px rgba(0, 0, 0, 0.4);
+  transition: rotate 350ms cubic-bezier(0.2, 0.8, 0.2, 1), scale 350ms cubic-bezier(0.2, 0.8, 0.2, 1),
+    translate 350ms cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 350ms ease;
+
+  &:nth-child(odd) {
+    rotate: -2.5deg;
+  }
+
+  &:nth-child(even) {
+    rotate: 2.5deg;
+  }
+
+  &:hover,
+  &:focus-within {
+    rotate: 0deg;
+    scale: 1.05;
+    translate: 0 -10px;
+    box-shadow: 0 30px 56px -14px rgba(0, 0, 0, 0.5);
+    z-index: 3;
+  }
+
+  &::before {
+    content: counter(showcaseCount, decimal-leading-zero);
+    position: absolute;
+    top: 14px;
+    left: 14px;
+    z-index: 2;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background-color: var(--colorWhite);
+    color: var(--marketplaceColor);
+    font-weight: 700;
+    font-size: 14px;
+    box-shadow: 0 4px 12px 0 rgba(0, 0, 0, 0.3);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .card {
+    transition: box-shadow 200ms ease;
+    rotate: 0deg;
+
+    &:hover,
+    &:focus-within {
+      scale: 1;
+      translate: 0;
     }
   }
 }

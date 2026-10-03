@@ -247,14 +247,18 @@ const SectionListings = props => {
   } = featuredListings;
 
   const listingIds = featuredListingData?.[sectionId]?.listingIds;
-  const listingEntities = listingIds ? getListingEntitiesById(listingIds) : [];
+  const allListingEntities = listingIds ? getListingEntitiesById(listingIds) : [];
+  // Skip listings that don't have a photo yet (e.g. a provider's new, unfinished
+  // listing) - they'd otherwise show up as an empty "NO IMAGE" card in this
+  // showcase, which isn't the polished look the section is going for.
+  const listingEntities = allListingEntities.filter(listing => listing?.images?.length > 0);
 
   const fetched = featuredListingData?.[sectionId]?.fetched || false;
   const inProgress = featuredListingData?.[sectionId]?.inProgress;
 
   const error = featuredListingData?.[sectionId]?.error;
 
-  const numberOfListings = listingEntities?.length > 0 ? listingIds?.length : 0;
+  const numberOfListings = listingEntities?.length > 0 ? listingEntities?.length : 0;
 
   const [carouselWidthConstant, setCarouselWidthConstant] = useState(null);
   const [mounted, setMounted] = useState(false);
@@ -336,12 +340,12 @@ const SectionListings = props => {
     <SectionContainer
       id={sectionId}
       className={className}
-      rootClassName={rootClassName}
+      rootClassName={classNames(css.showcaseRoot, rootClassName)}
       appearance={appearance}
       options={fieldOptions}
     >
       {hasHeaderFields ? (
-        <header className={defaultClasses.sectionDetails}>
+        <header className={classNames(defaultClasses.sectionDetails, css.showcaseHeader)}>
           <Field data={title} className={defaultClasses.title} options={fieldOptions} />
           <Field data={description} className={defaultClasses.description} options={fieldOptions} />
           <Field data={callToAction} className={defaultClasses.ctaButton} options={fieldOptions} />
