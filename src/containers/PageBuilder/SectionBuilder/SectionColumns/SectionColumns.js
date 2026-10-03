@@ -108,6 +108,7 @@ const SectionColumns = props => {
           })}
         >
           <BlockBuilder
+            rootClassName={css.block}
             ctaButtonClass={defaultClasses.ctaButton}
             blocks={blocks}
             sectionId={sectionId}

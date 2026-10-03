@@ -36,3 +36,30 @@
   padding-left: 0;
   padding-right: 0;
 }
+
+/* Gives each column a premium "card" feel - handy for stat highlights
+   ("50+ islands", "1,200 happy travelers") or feature callouts, and a
+   step up from a plain, flat grid of text. */
+.block {
+  background-color: var(--colorWhite);
+  border-radius: 16px;
+  padding: 32px 24px;
+  text-align: center;
+  box-shadow: 0 2px 8px 0 rgb(0 0 0 / 6%);
+  transition: box-shadow 300ms ease, transform 300ms ease;
+
+  &:hover {
+    box-shadow: 0 16px 32px 0 rgb(0 0 0 / 10%);
+    transform: translateY(-4px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .block {
+    transition: none;
+
+    &:hover {
+      transform: none;
+    }
+  }
+}

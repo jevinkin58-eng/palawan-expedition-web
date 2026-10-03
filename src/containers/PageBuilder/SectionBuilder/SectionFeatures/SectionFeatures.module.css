@@ -19,16 +19,32 @@
   align-items: center;
   grid-auto-flow: dense;
   gap: 0;
+  background-color: var(--colorWhite);
+  border-radius: 16px;
+  padding: 24px;
+  box-shadow: 0 2px 8px 0 rgb(0 0 0 / 6%);
+  transition: box-shadow 300ms ease;
+
+  &:hover {
+    box-shadow: 0 16px 32px 0 rgb(0 0 0 / 10%);
+  }
 
   @media (--viewportMedium) {
     gap: 64px;
     flex-direction: row-reverse;
+    padding: 40px;
   }
 
   &:nth-child(even) {
     @media (--viewportMedium) {
       flex-direction: row;
     }
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .block {
+    transition: none;
   }
 }
 
