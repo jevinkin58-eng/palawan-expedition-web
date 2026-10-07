@@ -590,9 +590,19 @@ export const getDerivedRenderData = ({
   const { defaultFilters: defaultFiltersRaw, sortConfig, mainSearch } = config?.search || {};
 
   const activeListingTypes = config?.listing?.listingTypes.map(c => c.listingType);
-  const defaultFiltersConfig = listingTypePathParam
+  const defaultFiltersWithoutListingType = listingTypePathParam
     ? defaultFiltersRaw.filter(f => f.key !== 'listingType')
     : defaultFiltersRaw;
+
+  // Ensure the dates filter is always present for search pages.
+  // The hosted config from Sharetribe Console may exclude it.
+  const hasDatesFilter = defaultFiltersWithoutListingType?.some(f => f.key === 'dates');
+  const defaultFiltersConfig = hasDatesFilter
+    ? defaultFiltersWithoutListingType
+    : [
+        ...(defaultFiltersWithoutListingType || []),
+        { key: 'dates', schemaType: 'dates', label: 'Departure date', availability: 'time-full', dateRangeMode: 'day' },
+      ];
 
   const marketplaceCurrency = config.currency;
   const categoryConfiguration = config.categoryConfiguration;
