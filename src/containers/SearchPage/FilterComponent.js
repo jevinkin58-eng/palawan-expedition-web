@@ -8,6 +8,7 @@ import { convertCategoriesToSelectTreeOptions, constructQueryParamName } from '.
 import SelectSingleFilter from './SelectSingleFilter/SelectSingleFilter';
 import SelectMultipleFilter from './SelectMultipleFilter/SelectMultipleFilter';
 import BookingDateRangeFilter from './BookingDateRangeFilter/BookingDateRangeFilter';
+import DepartureDateFilter from './DepartureDateFilter/DepartureDateFilter';
 import KeywordFilter from './KeywordFilter/KeywordFilter';
 import PriceFilter from './PriceFilter/PriceFilter';
 import IntegerRangeFilter from './IntegerRangeFilter/IntegerRangeFilter';
@@ -118,15 +119,12 @@ const FilterComponent = props => {
         />
       );
     case 'dates': {
-      const { dateRangeMode } = config;
-      const isNightlyMode = dateRangeMode === 'night';
       return (
-        <BookingDateRangeFilter
-          label={intl.formatMessage({ id: 'FilterComponent.datesLabel' })}
+        <DepartureDateFilter
+          label={intl.formatMessage({ id: 'DepartureDateFilter.labelPopup' })}
           queryParamNames={[key]}
           initialValues={initialValues([key], liveEdit)}
           onSubmit={getHandleChangedValueFn(useHistoryPush)}
-          minimumNights={isNightlyMode ? 1 : 0}
           getAriaLabel={getAriaLabel}
           {...rest}
         />
