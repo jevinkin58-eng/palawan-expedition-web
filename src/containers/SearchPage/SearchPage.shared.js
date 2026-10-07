@@ -647,15 +647,21 @@ export const getDerivedRenderData = ({
     listingFieldsConfig,
     activeListingTypes
   );
+  // Put the departure-date filter near the top of the sidebar so it's visible without scrolling.
+  const datesFilter = builtInFilters.filter(f => f.key === 'dates');
+  const otherBuiltInFilters = builtInFilters.filter(f => f.key !== 'dates');
+
   const availablePrimaryFilters = [
     ...builtInPrimaryFilters,
+    ...datesFilter,
     ...customPrimaryFilters,
-    ...builtInFilters,
+    ...otherBuiltInFilters,
   ];
   const availableFilters = [
     ...builtInPrimaryFilters,
+    ...datesFilter,
     ...customPrimaryFilters,
-    ...builtInFilters,
+    ...otherBuiltInFilters,
     ...customSecondaryFilters,
   ];
 
