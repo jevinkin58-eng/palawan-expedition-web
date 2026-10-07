@@ -1654,10 +1654,19 @@ const mergeSearchConfig = (
   // Note: The category filter might affect the visibility of custom filters (listing fields).
   //       It might be somewhat strange experience if a primary filter is among those filters
   //       that are affected by category selection.
-  // Ensure dateRangeFilter falls back to local config if hosted config doesn't include it.
-  // This is needed because the hosted config from Sharetribe Console may not include
-  // the dateRangeFilter, causing it to be undefined and filtered out.
-  const effectiveDateRangeFilter = dateRangeFilter || defaultSearchConfig.dateRangeFilter;
+  // Ensure dateRangeFilter is always included with enabled: true.
+  // The hosted config from Sharetribe Console may not include it or may set enabled: false,
+  // but we need it for the departure date picker on the Tours search page.
+  const fallbackDateRangeFilter = defaultSearchConfig.dateRangeFilter || {
+    schemaType: 'dates',
+    availability: 'time-full',
+    dateRangeMode: 'day',
+  };
+  const effectiveDateRangeFilter = {
+    ...fallbackDateRangeFilter,
+    ...(dateRangeFilter || {}),
+    enabled: true,
+  };
 
   const defaultFilters = [
     ...listingTypeFilterMaybe,
