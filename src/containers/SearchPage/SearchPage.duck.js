@@ -165,14 +165,23 @@ const searchListingsPayloadCreator = ({ searchParams, config }, thunkAPI) => {
   };
 
   const datesSearchParams = datesParam => {
-    // NOTE: The departure date filter is currently UI-only.
-    // Tour listings use inquiry/purchase process without availability management,
-    // so sending availability params (start, end, minDuration) to the API causes errors.
-    // To make this filter actually work server-side, you need to either:
-    //   1) Enable availability management on your listing types in Sharetribe Console, OR
-    //   2) Use a custom public data field (e.g. pub_departureDate) for filtering.
-    // For now, we skip the API availability query so the search doesn't break.
-    return {};
+    // Tour listings don't use Sharetribe availability management, so we can't send
+    // start/end/minDuration params. Instead, we convert the selected date into a
+    // pub_departure_date range query using YYYYMMDD number format.
+    // The departure_date field is a 'long' type in Sharetribe Console.
+    if (!datesParam) {
+      return {};
+    }
+    const values = datesParam.split(',');
+    const startDateStr = values[0]; // e.g. "2026-10-15"
+    if (!startDateStr) {
+      return {};
+    }
+    // Convert ISO date string to YYYYMMDD number
+    const startNum = Number(startDateStr.replace(/-/g, '')); // 20261015
+    // For the upper bound, use a far-future date so we get all tours from the selected date onward
+    const endNum = 99991231;
+    return { pub_departure_date: `${startNum},${endNum}` };
   };
 
   const stockFilters = datesMaybe => {
