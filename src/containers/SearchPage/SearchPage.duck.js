@@ -165,62 +165,14 @@ const searchListingsPayloadCreator = ({ searchParams, config }, thunkAPI) => {
   };
 
   const datesSearchParams = datesParam => {
-    const searchTZ = 'Etc/UTC';
-    const datesFilter = config.search.defaultFilters.find(f => f.key === 'dates');
-    const values = datesParam ? datesParam.split(',') : [];
-    const hasValues = datesFilter && datesParam && values.length === 2;
-    const { dateRangeMode, availability } = datesFilter || {};
-    const isNightlyMode = dateRangeMode === 'night';
-    const isEntireRangeAvailable = availability === 'time-full';
-
-    // SearchPage need to use a single time zone but listings can have different time zones
-    // We need to expand/prolong the time window (start & end) to cover other time zones too.
-    //
-    // NOTE: you might want to consider changing UI so that
-    //   1) location is always asked first before date range
-    //   2) use some 3rd party service to convert location to time zone (IANA tz name)
-    //   3) Make exact dates filtering against that specific time zone
-    //   This setup would be better for dates filter,
-    //   but it enforces a UX where location is always asked first and therefore configurability
-    const getProlongedStart = date => subtractTime(date, 14, 'hours', searchTZ);
-    const getProlongedEnd = date => addTime(date, 12, 'hours', searchTZ);
-
-    const startDate = hasValues ? parseDateFromISO8601(values[0], searchTZ) : null;
-    const endRaw = hasValues ? parseDateFromISO8601(values[1], searchTZ) : null;
-    const endDate =
-      hasValues && isNightlyMode
-        ? endRaw
-        : hasValues
-        ? getExclusiveEndDate(endRaw, searchTZ)
-        : null;
-
-    const today = getStartOf(new Date(), 'day', searchTZ);
-    const possibleStartDate = subtractTime(today, 14, 'hours', searchTZ);
-    const hasValidDates =
-      hasValues &&
-      startDate.getTime() >= possibleStartDate.getTime() &&
-      startDate.getTime() <= endDate.getTime();
-
-    const dayCount = isEntireRangeAvailable ? daysBetween(startDate, endDate) : 1;
-    const day = 1440;
-    const hour = 60;
-    // When entire range is required to be available, we count minutes of included date range,
-    // but there's a need to subtract one hour due to possibility of daylight saving time.
-    // If partial range is needed, then we just make sure that the shortest time unit supported
-    // is available within the range.
-    // You might want to customize this to match with your time units (e.g. day: 1440 - 60)
-    const minDuration = isEntireRangeAvailable ? dayCount * day - hour : hour;
-    return hasValidDates
-      ? {
-          start: getProlongedStart(startDate),
-          end: getProlongedEnd(endDate),
-          // Availability can be time-full or time-partial.
-          // However, due to prolonged time window, we need to use time-partial.
-          availability: 'time-partial',
-          // minDuration uses minutes
-          minDuration,
-        }
-      : {};
+    // NOTE: The departure date filter is currently UI-only.
+    // Tour listings use inquiry/purchase process without availability management,
+    // so sending availability params (start, end, minDuration) to the API causes errors.
+    // To make this filter actually work server-side, you need to either:
+    //   1) Enable availability management on your listing types in Sharetribe Console, OR
+    //   2) Use a custom public data field (e.g. pub_departureDate) for filtering.
+    // For now, we skip the API availability query so the search doesn't break.
+    return {};
   };
 
   const stockFilters = datesMaybe => {
