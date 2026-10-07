@@ -601,7 +601,7 @@ export const getDerivedRenderData = ({
     ? defaultFiltersWithoutListingType
     : [
         ...(defaultFiltersWithoutListingType || []),
-        { key: 'dates', schemaType: 'dates', label: 'Departure date', availability: 'time-full', dateRangeMode: 'day' },
+        { key: 'dates', schemaType: 'dates', label: 'Departure date', availability: 'time-partial', dateRangeMode: 'day' },
       ];
 
   const marketplaceCurrency = config.currency;

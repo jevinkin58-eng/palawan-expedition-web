@@ -1659,13 +1659,14 @@ const mergeSearchConfig = (
   // but we need it for the departure date picker on the Tours search page.
   const fallbackDateRangeFilter = defaultSearchConfig.dateRangeFilter || {
     schemaType: 'dates',
-    availability: 'time-full',
+    availability: 'time-partial',
     dateRangeMode: 'day',
   };
   const effectiveDateRangeFilter = {
     ...fallbackDateRangeFilter,
     ...(dateRangeFilter || {}),
     enabled: true,
+    availability: 'time-partial',
   };
 
   const defaultFilters = [
