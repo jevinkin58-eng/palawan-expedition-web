@@ -24,23 +24,42 @@ import css from './ListingCard.module.css';
 const LazyImage = lazyLoadWithDimensions(ResponsiveImage, { loadAfterInitialRendering: 3000 });
 
 /**
+ * Format YYYYMMDD number to readable date string
+ */
+const formatDepartureDate = (departureDateNum) => {
+  if (!departureDateNum) return null;
+  const str = String(departureDateNum);
+  if (str.length !== 8) return null;
+  const year = str.slice(0, 4);
+  const month = str.slice(4, 6);
+  const day = str.slice(6, 8);
+  const date = new Date(`${year}-${month}-${day}`);
+  if (isNaN(date.getTime())) return null;
+  return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+};
+
+/**
+ * Format duration value to readable string
+ */
+const formatDuration = (duration) => {
+  if (!duration) return null;
+  if (typeof duration === 'number') {
+    if (duration === 1) return '1 Day';
+    return `${duration} Days`;
+  }
+  const durationMap = {
+    'day-tour': 'Day Tour',
+    'day_tour': 'Day Tour',
+    '2-5-days': '2-5 Days',
+    '2_5_days': '2-5 Days',
+    '6-plus-days': '6+ Days',
+    '6_plus_days': '6+ Days',
+  };
+  return durationMap[duration] || duration;
+};
+
+/**
  * ListingCardImage
- * Component responsible for rendering the image part of the listing card.
- * It either renders the first image from the listing's images array with lazy loading,
- * or a stylized placeholder if images are disabled for the listing type.
- * Also wraps the image in a fixed aspect ratio container for consistent layout.
- * @component
- * @param {Object} props
- * @param {Object} props.listing listing entity with image data
- * @param {Function?} props.setActivePropsMaybe mouse enter/leave handlers for map highlighting
- * @param {string} props.title listing title for alt text
- * @param {string} props.renderSizes img/srcset size rules
- * @param {number} props.aspectWidth aspect ratio width
- * @param {number} props.aspectHeight aspect ratio height
- * @param {string} props.variantPrefix image variant prefix (e.g. "listing-card")
- * @param {boolean} props.showListingImage whether to show actual listing image or not
- * @param {Object?} props.style the background color for the listing card with no image
- * @returns {JSX.Element} listing image with fixed aspect ratio or fallback preview
  */
 const ListingCardImage = props => {
   const {
@@ -82,18 +101,13 @@ const ListingCardImage = props => {
 };
 
 /**
- * ListingCard
+ * ListingCard — Enhanced for Palawan Expedition tours
+ *
+ * Shows departure date badge, duration, experience type, comfort level,
+ * route (from → to), max tribe size, privacy type, accommodation,
+ * seats left, rating, and company info.
  *
  * @component
- * @param {Object} props
- * @param {string?} props.className add more style rules in addition to component's own css.root
- * @param {string?} props.rootClassName overwrite components own css.root
- * @param {string?} props.aspectRatioClassName custom className for AspectRatioWrapper component
- * @param {Object} props.listing API entity: listing or ownListing
- * @param {string?} props.renderSizes for img/srcset
- * @param {Function?} props.setActiveListing
- * @param {boolean?} props.showAuthorInfo
- * @returns {JSX.Element} listing card to be used in search result panel etc.
  */
 export const ListingCard = props => {
   const config = useConfiguration();
@@ -131,7 +145,6 @@ export const ListingCard = props => {
   const { listingType, cardStyle } = publicData || {};
   const validListingTypes = config.listing.listingTypes || [];
   const foundListingTypeConfig = validListingTypes.find(conf => conf.listingType === listingType);
-  // Render the listing image only if listing images are enabled in the listing type
   const showListingImage = requireListingImage(foundListingTypeConfig);
 
   const {
@@ -140,13 +153,30 @@ export const ListingCard = props => {
     variantPrefix = 'listing-card',
   } = config.layout.listingImage;
 
-  // Sets the listing as active in the search map when hovered (if the search map is enabled)
   const setActivePropsMaybe = setActiveListing
     ? {
         onMouseEnter: () => setActiveListing(listing?.id),
         onMouseLeave: () => setActiveListing(null),
       }
     : null;
+
+  // Tour-specific publicData fields
+  const departureDate = publicData?.departure_date;
+  const duration = publicData?.duration;
+  const experienceType = publicData?.experience_type;
+  const comfortLevel = publicData?.comfort_level;
+  const locationDeparture = publicData?.location_departure;
+  const locationArrival = publicData?.location_arrival;
+  const maxTribe = publicData?.max_tribe;
+  const privacyType = publicData?.privacy_type;
+  const accommodation = publicData?.accommodation;
+  const seatsLeft = publicData?.seats_left;
+  const rating = publicData?.rating;
+  const companyName = publicData?.company_name;
+
+  const formattedDate = formatDepartureDate(departureDate);
+  const formattedDuration = formatDuration(duration);
+  const isLowSeats = seatsLeft != null && seatsLeft <= 3;
 
   return (
     <NamedLink
@@ -155,46 +185,117 @@ export const ListingCard = props => {
       params={{ id, slug }}
       ariaLabel={cardAriaLabel}
     >
-      {showListingImage ? (
-        <ListingCardImage
-          renderSizes={renderSizes}
-          title={titlePlain}
-          listing={listing}
-          setActivePropsMaybe={setActivePropsMaybe}
-          aspectWidth={aspectWidth}
-          aspectHeight={aspectHeight}
-          variantPrefix={variantPrefix}
-          aspectRatioClassName={aspectRatioClassName}
-          lazyLoadImage={lazyLoadImage}
-        />
-      ) : (
-        <ListingCardThumbnail
-          style={cardStyle}
-          listingTitle={title}
-          className={aspectRatioClassName}
-          width={aspectWidth}
-          height={aspectHeight}
-          setActivePropsMaybe={setActivePropsMaybe}
-        />
-      )}
+      <div className={css.imageWrapper}>
+        {formattedDate && (
+          <span className={css.departureBadge}>
+            {formattedDate}
+          </span>
+        )}
+        {seatsLeft != null && (
+          <span className={classNames(css.seatsLeft, { [css.seatsLow]: isLowSeats })}>
+            {seatsLeft} {seatsLeft === 1 ? 'seat' : 'seats'} left
+          </span>
+        )}
+        {showListingImage ? (
+          <ListingCardImage
+            renderSizes={renderSizes}
+            title={titlePlain}
+            listing={listing}
+            setActivePropsMaybe={setActivePropsMaybe}
+            aspectWidth={aspectWidth}
+            aspectHeight={aspectHeight}
+            variantPrefix={variantPrefix}
+            aspectRatioClassName={aspectRatioClassName}
+            lazyLoadImage={lazyLoadImage}
+          />
+        ) : (
+          <ListingCardThumbnail
+            style={cardStyle}
+            listingTitle={title}
+            className={aspectRatioClassName}
+            width={aspectWidth}
+            height={aspectHeight}
+            setActivePropsMaybe={setActivePropsMaybe}
+          />
+        )}
+      </div>
+
       <div className={css.info}>
-        {showPrice ? (
-          <div className={css.price} title={priceTooltip}>
-            {priceMessage}
-          </div>
-        ) : null}
         <div className={css.mainInfo}>
           {showListingImage && (
             <div className={classNames(css.title, { [css.lightText]: darkMode })}>
               {titleFormatted}
             </div>
           )}
-          {showAuthorInfo ? (
-            <div className={classNames(css.authorInfo, { [css.lightText]: darkMode })}>
-              {authorName}
+          {showPrice ? (
+            <div className={css.price} title={priceTooltip}>
+              {priceMessage}
             </div>
           ) : null}
         </div>
+
+        {/* Tour meta info */}
+        <div className={css.tourMeta}>
+          {formattedDuration && (
+            <span className={css.metaItem}>
+              <span className={css.metaLabel}>{formattedDuration}</span>
+            </span>
+          )}
+          {experienceType && (
+            <span className={css.metaItem}>
+              <span className={css.metaLabel}>{experienceType}</span>
+            </span>
+          )}
+          {comfortLevel && (
+            <span className={css.metaItem}>{comfortLevel}</span>
+          )}
+          {maxTribe && (
+            <span className={css.metaItem}>Max {maxTribe}</span>
+          )}
+          {accommodation && (
+            <span className={css.metaItem}>{accommodation}</span>
+          )}
+        </div>
+
+        {/* Route info: From → To */}
+        {(locationDeparture || locationArrival) && (
+          <div className={css.routeInfo}>
+            {locationDeparture && <span>{locationDeparture}</span>}
+            {locationDeparture && locationArrival && <span className={css.routeArrow}>→</span>}
+            {locationArrival && <span>{locationArrival}</span>}
+          </div>
+        )}
+
+        {/* Privacy badge */}
+        {privacyType && (
+          <span className={classNames(css.privacyBadge, {
+            [css.privacyPrivate]: privacyType === 'private' || privacyType === 'private_tribe',
+            [css.privacyJoiners]: privacyType === 'joiners' || privacyType === 'triber_joiners',
+          })}>
+            {privacyType === 'private' || privacyType === 'private_tribe' ? 'Private Tribe' : 'Triber Joiners'}
+          </span>
+        )}
+
+        {/* Footer: rating + company */}
+        {(rating || companyName || showAuthorInfo) && (
+          <div className={css.cardFooter}>
+            {rating ? (
+              <div className={css.ratingWrapper}>
+                <span className={css.ratingStar}>★</span>
+                <span className={css.ratingValue}>{Number(rating).toFixed(1)}</span>
+              </div>
+            ) : <div />}
+            {companyName ? (
+              <div className={css.companyInfo}>
+                <span className={css.companyName}>{companyName}</span>
+              </div>
+            ) : showAuthorInfo ? (
+              <div className={classNames(css.authorInfo, { [css.lightText]: darkMode })}>
+                {authorName}
+              </div>
+            ) : null}
+          </div>
+        )}
       </div>
     </NamedLink>
   );

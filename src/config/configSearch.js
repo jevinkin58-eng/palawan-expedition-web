@@ -89,7 +89,8 @@ export const sortConfig = {
     { key: '-createdAt', labelTranslationKey: 'SortBy.oldest' },
     { key: '-price', labelTranslationKey: 'SortBy.lowestPrice' },
     { key: 'price', labelTranslationKey: 'SortBy.highestPrice' },
-    // If you add own sort options, you can also use label key: { key: 'meta_rating', label: 'Highest rated' },
+    { key: '-pub_rating', label: 'Highest rated' },
+    { key: 'pub_departure_date', label: 'Earliest departure' },
 
     // The relevance is only used for keyword search, but the
     // parameter isn't sent to the Marketplace API. The key is purely
