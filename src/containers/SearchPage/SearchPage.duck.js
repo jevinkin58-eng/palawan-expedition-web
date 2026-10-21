@@ -48,17 +48,20 @@ const searchListingsPayloadCreator = ({ searchParams, config }, thunkAPI) => {
   // Read More:
   // https://www.sharetribe.com/docs/how-to/manage-search-schemas-with-flex-cli/#adding-listing-search-schemas
   const searchValidListingTypes = (listingTypes, listingTypePathParam, isListingTypeVariant) => {
+    // If enforceValidListingType is false, don't filter by listing type at all
+    // This ensures all listings show regardless of type mismatch (e.g. 'trip' vs 'trp')
+    if (!config.listing.enforceValidListingType) {
+      return {};
+    }
     return isListingTypeVariant
       ? {
           pub_listingType: listingTypePathParam,
         }
-      : config.listing.enforceValidListingType
-      ? {
+      : {
           pub_listingType: listingTypes.map(l => l.listingType),
           // pub_transactionProcessAlias: listingTypes.map(l => l.transactionType.alias),
           // pub_unitType: listingTypes.map(l => l.transactionType.unitType),
-        }
-      : {};
+        };
   };
 
   const constructCategoryPropertiesForAPI = (queryParamPrefix, categories, level, params) => {
@@ -185,14 +188,9 @@ const searchListingsPayloadCreator = ({ searchParams, config }, thunkAPI) => {
   };
 
   const stockFilters = datesMaybe => {
-    const hasDatesFilterInUse = Object.keys(datesMaybe).length > 0;
-
-    // If dates filter is not in use,
-    //   1) Add minStock filter with default value (1)
-    //   2) Add relaxed stockMode: "match-undefined"
-    // The latter is used to filter out all the listings that explicitly are out of stock,
-    // but keeps bookable and inquiry listings.
-    return hasDatesFilterInUse ? {} : { minStock: 1, stockMode: 'match-undefined' };
+    // Tour/expedition listings don't use Sharetribe's built-in stock/availability system.
+    // Skip stock filtering entirely so all published listings are returned.
+    return {};
   };
 
   const seatsSearchParams = (seats, datesMaybe) => {
