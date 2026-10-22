@@ -17,9 +17,12 @@ const queryDirectoryListingsPayloadCreator = ({ queryParams, config }, thunkAPI)
   } = config?.layout?.listingImage || {};
   const aspectRatio = aspectHeight / aspectWidth;
 
+  // Extract listing type for client-side filtering (no search schema needed)
+  const { pub_listingType, ...apiParams } = queryParams || {};
+
   const params = {
-    ...queryParams,
-    per_page: RESULT_PAGE_SIZE,
+    ...apiParams,
+    per_page: 100,
     include: ['author', 'images'],
     'fields.image': [`variants.${variantPrefix}`, `variants.${variantPrefix}-2x`],
     ...createImageVariantConfig(`${variantPrefix}`, 400, aspectRatio),
@@ -30,15 +33,19 @@ const queryDirectoryListingsPayloadCreator = ({ queryParams, config }, thunkAPI)
     .query(params)
     .then(response => {
       const listings = response.data.data;
-      const listingRefs = listings
-        .filter(l => !l.attributes.deleted && l.attributes.state === 'published')
-        .map(l => ({ id: l.id, type: l.type }));
+      const filteredListings = listings.filter(l => {
+        if (l.attributes.deleted || l.attributes.state !== 'published') return false;
+        if (!pub_listingType) return true;
+        const type = l.attributes?.publicData?.listingType;
+        return type === pub_listingType;
+      });
+      const listingRefs = filteredListings.map(l => ({ id: l.id, type: l.type }));
       dispatch(addMarketplaceEntities(response));
       return {
         listingRefs,
-        totalItems: response.data.meta.totalItems,
-        totalPages: response.data.meta.totalPages,
-        page: response.data.meta.page,
+        totalItems: filteredListings.length,
+        totalPages: 1,
+        page: 1,
       };
     })
     .catch(e => rejectWithValue(storableError(e)));
