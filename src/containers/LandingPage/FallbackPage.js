@@ -145,7 +145,7 @@ const SectionCategories = () => (
         </p>
       </NamedLink>
 
-      <div className={css.categoryCard}>
+      <NamedLink name="CompaniesPage" className={css.categoryCard}>
         <span className={css.categoryIcon} role="img" aria-label="Companies">
           &#x1F3E2;
         </span>
@@ -153,9 +153,9 @@ const SectionCategories = () => (
         <p className={css.categoryDesc}>
           Trusted local operators with verified reviews
         </p>
-      </div>
+      </NamedLink>
 
-      <div className={css.categoryCard}>
+      <NamedLink name="CampsPage" className={css.categoryCard}>
         <span className={css.categoryIcon} role="img" aria-label="Camps">
           &#x26FA;
         </span>
@@ -163,9 +163,9 @@ const SectionCategories = () => (
         <p className={css.categoryDesc}>
           Beach camps and eco-lodges across Palawan's islands
         </p>
-      </div>
+      </NamedLink>
 
-      <div className={css.categoryCard}>
+      <NamedLink name="BoatsPage" className={css.categoryCard}>
         <span className={css.categoryIcon} role="img" aria-label="Boats">
           &#x26F5;
         </span>
@@ -173,7 +173,7 @@ const SectionCategories = () => (
         <p className={css.categoryDesc}>
           Charter vessels and expedition boats for every budget
         </p>
-      </div>
+      </NamedLink>
     </div>
   </section>
 );

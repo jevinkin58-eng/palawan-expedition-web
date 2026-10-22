@@ -12,6 +12,10 @@ import { NamedRedirect } from '../components';
 
 const pageDataLoadingAPI = getPageDataLoadingAPI();
 
+const CompaniesPage = loadable(() => import(/* webpackChunkName: "CompaniesPage" */ '../containers/CompaniesPage/CompaniesPage'));
+const CampsPage = loadable(() => import(/* webpackChunkName: "CampsPage" */ '../containers/CampsPage/CampsPage'));
+const BoatsPage = loadable(() => import(/* webpackChunkName: "BoatsPage" */ '../containers/BoatsPage/BoatsPage'));
+
 const AuthenticationPage = loadable(() => import(/* webpackChunkName: "AuthenticationPage" */ '../containers/AuthenticationPage/AuthenticationPage'));
 const CheckoutPage = loadable(() => import(/* webpackChunkName: "CheckoutPage" */ '../containers/CheckoutPage/CheckoutPage'));
 const CMSPage = loadable(() => import(/* webpackChunkName: "CMSPage" */ '../containers/CMSPage/CMSPage'));
@@ -87,6 +91,21 @@ const routeConfiguration = (layoutConfig, accessControlConfig) => {
       name: 'CMSPage',
       component: CMSPage,
       loadData: pageDataLoadingAPI.CMSPage.loadData,
+    },
+    {
+      path: '/companies',
+      name: 'CompaniesPage',
+      component: CompaniesPage,
+    },
+    {
+      path: '/camps',
+      name: 'CampsPage',
+      component: CampsPage,
+    },
+    {
+      path: '/boats',
+      name: 'BoatsPage',
+      component: BoatsPage,
     },
     // NOTE: when the private marketplace feature is enabled, the '/s' route is disallowed by the robots.txt resource.
     // If you add new routes that start with '/s*' (e.g. /support), you should add them to the robotsPrivateMarketplace.txt file.
