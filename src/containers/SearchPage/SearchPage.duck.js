@@ -283,11 +283,58 @@ const searchListingsPayloadCreator = ({ searchParams, config }, thunkAPI) => {
     perPage,
   };
 
+  // Remove pub_departure_date from API params — the search schema may not be
+  // configured in Sharetribe Console, so the API would silently ignore it.
+  // We apply departure-date filtering client-side instead.
+  const { pub_departure_date: departureDateRange, ...apiParams } = params;
+
+  // Sort by pub_* fields may not work without a search schema in Console.
+  // We handle these client-side instead.
+  const sortByDeparture = apiParams.sort === 'pub_departure_date';
+  const sortByDepartureDesc = apiParams.sort === '-pub_departure_date';
+  const sortByRating = apiParams.sort === '-pub_rating';
+  const clientSideSort = sortByDeparture || sortByDepartureDesc || sortByRating;
+  if (clientSideSort) {
+    delete apiParams.sort;
+  }
+
   return sdk.listings
-    .query(params)
+    .query(apiParams)
     .then(response => {
       const listingFields = config?.listing?.listingFields;
       const sanitizeConfig = { listingFields };
+
+      // Client-side departure date filtering
+      if (departureDateRange) {
+        const [minStr, maxStr] = departureDateRange.split(',');
+        const minDate = Number(minStr);
+        const maxDate = Number(maxStr);
+        response.data.data = response.data.data.filter(listing => {
+          const depDate = listing.attributes?.publicData?.departure_date;
+          if (!depDate) return false;
+          return depDate >= minDate && depDate <= maxDate;
+        });
+        // Update total count
+        response.data.meta.totalItems = response.data.data.length;
+      }
+
+      // Client-side sort by departure date
+      if (clientSideSort) {
+        response.data.data.sort((a, b) => {
+          const dateA = a.attributes?.publicData?.departure_date || 0;
+          const dateB = b.attributes?.publicData?.departure_date || 0;
+          return sortByDeparture ? dateA - dateB : dateB - dateA;
+        });
+      }
+
+      // Client-side sort by rating
+      if (sortByRating) {
+        response.data.data.sort((a, b) => {
+          const ratingA = a.attributes?.publicData?.rating || 0;
+          const ratingB = b.attributes?.publicData?.rating || 0;
+          return ratingB - ratingA;
+        });
+      }
 
       dispatch(addMarketplaceEntities(response, sanitizeConfig));
       return response;
