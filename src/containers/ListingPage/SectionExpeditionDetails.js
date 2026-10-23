@@ -119,10 +119,15 @@ const prettifyKey = key => {
 
 /**
  * Prettify an enum value for display.
+ * Unlike keys, values should NOT be dictionary-split — they are real words/names.
+ * Only replace underscores/hyphens with spaces and capitalize.
  */
 const prettifyEnum = val => {
   if (val == null) return null;
-  return splitCompoundWord(String(val))
+  const s = String(val);
+  return s
+    .replace(/[-_]/g, ' ')
+    .replace(/([a-z0-9])([A-Z])/g, '$1 $2')
     .replace(/\b\w/g, c => c.toUpperCase());
 };
 
