@@ -51,12 +51,67 @@ const formatDuration = val => {
 /**
  * Prettify a snake_case or kebab-case key into a readable label.
  */
+// Known compound words that Sharetribe Console stores without separators
+const KNOWN_WORDS = [
+  'arrival', 'departure', 'location', 'time', 'price', 'buyout', 'group',
+  'size', 'duration', 'type', 'tribe', 'party', 'level', 'boat', 'trip',
+  'crowd', 'expected', 'sleeping', 'style', 'activities', 'variations',
+  'enabled', 'established', 'capacity', 'comfort', 'rating', 'access',
+  'company', 'island', 'camp', 'village', 'visits', 'local', 'private',
+  'shared', 'room', 'tent', 'scuba', 'liveaboard', 'adventure', 'hiking',
+  'fishing', 'snorkeling', 'kitesurfing', 'surviving', 'social', 'wild',
+  'multi', 'days', 'joiner', 'expedition', 'seats', 'left', 'max', 'min',
+  'year', 'fleet', 'reservation', 'phone', 'number', 'email', 'address',
+  'manager', 'whatsapp', 'website', 'instagram', 'google', 'link',
+  'accounting', 'water', 'toys', 'retreats', 'vibes', 'food', 'option',
+  'catamaran', 'sailboat', 'motorboat', 'kayak',
+];
+
+/**
+ * Split a run-together string like "boattype" into "boat type"
+ * using a dictionary of known words (longest match first).
+ */
+const splitCompoundWord = str => {
+  if (!str) return str;
+  const s = String(str);
+  // If it already has spaces, underscores, hyphens, or mixed case — use standard split
+  if (/[\s_-]/.test(s) || /[a-z][A-Z]/.test(s)) {
+    return s
+      .replace(/([a-z0-9])([A-Z])/g, '$1 $2')
+      .replace(/[-_]/g, ' ');
+  }
+  // Try dictionary-based splitting on lowercase string
+  const lower = s.toLowerCase();
+  const words = [];
+  let i = 0;
+  while (i < lower.length) {
+    let matched = false;
+    // Try longest match first
+    for (let len = Math.min(lower.length - i, 15); len >= 2; len--) {
+      const candidate = lower.substring(i, i + len);
+      if (KNOWN_WORDS.includes(candidate)) {
+        words.push(candidate);
+        i += len;
+        matched = true;
+        break;
+      }
+    }
+    if (!matched) {
+      // Append character to last word or start new one
+      if (words.length > 0) {
+        words[words.length - 1] += lower[i];
+      } else {
+        words.push(lower[i]);
+      }
+      i++;
+    }
+  }
+  return words.join(' ');
+};
+
 const prettifyKey = key => {
   if (!key) return key;
-  return String(key)
-    // Insert space before uppercase letters (camelCase split)
-    .replace(/([a-z0-9])([A-Z])/g, '$1 $2')
-    .replace(/[-_]/g, ' ')
+  return splitCompoundWord(key)
     .replace(/\b\w/g, c => c.toUpperCase());
 };
 
@@ -65,9 +120,7 @@ const prettifyKey = key => {
  */
 const prettifyEnum = val => {
   if (val == null) return null;
-  return String(val)
-    .replace(/([a-z0-9])([A-Z])/g, '$1 $2')
-    .replace(/[-_]/g, ' ')
+  return splitCompoundWord(String(val))
     .replace(/\b\w/g, c => c.toUpperCase());
 };
 
