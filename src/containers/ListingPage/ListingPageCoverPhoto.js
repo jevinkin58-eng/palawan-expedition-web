@@ -53,6 +53,7 @@ import SectionReviews from './SectionReviews';
 import SectionAuthorMaybe from './SectionAuthorMaybe';
 import SectionMapMaybe from './SectionMapMaybe';
 import CustomListingFields from './CustomListingFields';
+import SectionExpeditionDetails from './SectionExpeditionDetails';
 import Notifications from './Notifications/Notifications';
 import ListingPageAccessWrapper from './ListingPageAccessWrapper';
 
@@ -298,6 +299,11 @@ export const ListingPageComponent = props => {
               )}
             </div>
             {showDescription && <SectionText text={description} showAsIngress />}
+
+            <SectionExpeditionDetails
+              publicData={publicData}
+              listingType={publicData?.listingType}
+            />
 
             <CustomListingFields
               publicData={publicData}
