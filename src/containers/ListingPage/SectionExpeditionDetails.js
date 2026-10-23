@@ -65,6 +65,8 @@ const KNOWN_WORDS = [
   'manager', 'whatsapp', 'website', 'instagram', 'google', 'link',
   'accounting', 'water', 'toys', 'retreats', 'vibes', 'food', 'option',
   'catamaran', 'sailboat', 'motorboat', 'kayak',
+  'in', 'on', 'the', 'of', 'at', 'to', 'for', 'by', 'and', 'or', 'no',
+  'more', 'than', 'per', 'person', 'yes',
 ];
 
 /**
