@@ -174,6 +174,89 @@ const SectionCategories = () => (
           Charter vessels and expedition boats for every budget
         </p>
       </NamedLink>
+
+      <NamedLink name="DestinationsPage" className={css.categoryCard}>
+        <span className={css.categoryIcon} role="img" aria-label="Destinations">
+          &#x1F3DD;
+        </span>
+        <h3 className={css.categoryTitle}>Destinations</h3>
+        <p className={css.categoryDesc}>
+          Explore El Nido, Coron, Port Barton, and hidden island gems
+        </p>
+      </NamedLink>
+    </div>
+  </section>
+);
+
+// ─── Featured Expeditions (static highlight cards) ───────────────
+
+const SectionFeatured = () => (
+  <section className={css.featuredSection}>
+    <div style={{ textAlign: 'center' }}>
+      <h2 className={css.sectionTitle}>Popular Expeditions</h2>
+      <p className={css.sectionSubtitle}>
+        Hand-picked adventures our travelers love most
+      </p>
+    </div>
+    <div className={css.featuredGrid}>
+      <div className={css.featuredCard}>
+        <div className={css.featuredImagePlaceholder}>
+          <span className={css.featuredEmoji}>🤿</span>
+        </div>
+        <div className={css.featuredBody}>
+          <span className={css.featuredBadge}>Diving</span>
+          <h3 className={css.featuredTitle}>Coron Shipwreck Diving</h3>
+          <p className={css.featuredDesc}>
+            Explore legendary Japanese shipwrecks in crystal-clear waters with expert dive masters.
+          </p>
+          <div className={css.featuredMeta}>
+            <span>3 Days</span>
+            <span>•</span>
+            <span>From $350/day</span>
+          </div>
+        </div>
+      </div>
+
+      <div className={css.featuredCard}>
+        <div className={css.featuredImagePlaceholder}>
+          <span className={css.featuredEmoji}>⛵</span>
+        </div>
+        <div className={css.featuredBody}>
+          <span className={css.featuredBadge}>Sailing</span>
+          <h3 className={css.featuredTitle}>El Nido to Coron Expedition</h3>
+          <p className={css.featuredDesc}>
+            Sail through remote islands, pristine beaches, and hidden lagoons over 5 days.
+          </p>
+          <div className={css.featuredMeta}>
+            <span>5 Days</span>
+            <span>•</span>
+            <span>From $350/day</span>
+          </div>
+        </div>
+      </div>
+
+      <div className={css.featuredCard}>
+        <div className={css.featuredImagePlaceholder}>
+          <span className={css.featuredEmoji}>🏝️</span>
+        </div>
+        <div className={css.featuredBody}>
+          <span className={css.featuredBadge}>Island Hopping</span>
+          <h3 className={css.featuredTitle}>Secret Beach & Lagoon Tour</h3>
+          <p className={css.featuredDesc}>
+            Discover hidden beaches, snorkel vibrant reefs, and kayak through Big & Small Lagoons.
+          </p>
+          <div className={css.featuredMeta}>
+            <span>1 Day</span>
+            <span>•</span>
+            <span>From $85/person</span>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div style={{ textAlign: 'center', marginTop: '36px' }}>
+      <NamedLink name="SearchPage" className={css.featuredCta}>
+        View All Expeditions →
+      </NamedLink>
     </div>
   </section>
 );
@@ -234,6 +317,7 @@ const customSectionComponents = {
   customHero: { component: SectionHeroCustom },
   customHowItWorks: { component: SectionHowItWorks },
   customCategories: { component: SectionCategories },
+  customFeatured: { component: SectionFeatured },
   customAbout: { component: SectionAbout },
   customCtaBanner: { component: SectionCtaBanner },
 };
@@ -243,6 +327,7 @@ export const fallbackSections = () => ({
     { sectionType: 'customHero', sectionId: 'hero' },
     { sectionType: 'customHowItWorks', sectionId: 'how-it-works' },
     { sectionType: 'customCategories', sectionId: 'categories' },
+    { sectionType: 'customFeatured', sectionId: 'featured' },
     { sectionType: 'customAbout', sectionId: 'about' },
     { sectionType: 'customCtaBanner', sectionId: 'cta' },
   ],
