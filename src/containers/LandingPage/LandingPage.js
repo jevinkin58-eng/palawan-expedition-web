@@ -19,17 +19,10 @@ const PageBuilder = loadable(() =>
 );
 
 export const LandingPageComponent = props => {
-  const { pageAssetsData, inProgress, error } = props;
+  const { error } = props;
 
-  return (
-    <PageBuilder
-      pageAssetsData={pageAssetsData?.[camelize(ASSET_NAME)]?.data}
-      inProgress={inProgress}
-      error={error}
-      fallbackPage={<FallbackPage error={error} />}
-      featuredListings={getFeaturedListingsProps(camelize(ASSET_NAME), props)}
-    />
-  );
+  // Always use our custom landing page instead of Console-hosted content
+  return <FallbackPage error={error} />;
 };
 
 LandingPageComponent.propTypes = {
