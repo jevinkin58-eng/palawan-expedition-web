@@ -281,13 +281,15 @@ export const ListingPageComponent = props => {
               listingType={publicData?.listingType}
             />
 
-            <CustomListingFields
-              publicData={publicData}
-              metadata={metadata}
-              listingFieldConfigs={listingConfig.listingFields}
-              categoryConfiguration={config.categoryConfiguration}
-              intl={intl}
-            />
+            {!['trip', 'Trip', 'company', 'Company', 'camp', 'Camp', 'boat', 'Boat', 'destinations', 'Destinations'].includes(publicData?.listingType) && (
+              <CustomListingFields
+                publicData={publicData}
+                metadata={metadata}
+                listingFieldConfigs={listingConfig.listingFields}
+                categoryConfiguration={config.categoryConfiguration}
+                intl={intl}
+              />
+            )}
 
             <SectionMapMaybe
               geolocation={geolocation}

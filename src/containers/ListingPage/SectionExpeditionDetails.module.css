@@ -343,19 +343,51 @@
   border: 0;
 }
 
-/* === Amenities === */
-.amenitiesGrid {
+/* === Tag Sections (multi-enum fields) === */
+.tagSectionsGrid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 20px;
+
+  @media (--viewportMedium) {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.tagSection {
+  padding: 16px;
+  background: var(--colorGrey50, #f9fafb);
+  border-radius: 10px;
+  border: 1px solid var(--colorGrey100, #e5e7eb);
+}
+
+.tagSectionTitle {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--colorGrey600, #4b5563);
+  margin: 0 0 10px 0;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.tagSectionIcon {
+  font-size: 16px;
+}
+
+.tagsGrid {
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
 }
 
-.amenityTag {
+.tag {
   padding: 6px 14px;
   background: rgba(14, 124, 107, 0.08);
   color: var(--marketplaceColor);
   border-radius: 20px;
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 500;
   border: 1px solid rgba(14, 124, 107, 0.2);
+  white-space: nowrap;
 }
