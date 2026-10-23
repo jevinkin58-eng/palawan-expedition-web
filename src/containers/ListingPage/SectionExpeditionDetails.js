@@ -1,6 +1,12 @@
 import React from 'react';
 import css from './SectionExpeditionDetails.module.css';
 
+// Keys to skip — these are internal Sharetribe fields or handled elsewhere
+const SKIP_KEYS = new Set([
+  'listingType', 'transactionProcessAlias', 'unitType',
+  'location', 'geolocation', 'rules', 'publicData',
+]);
+
 /**
  * Format a YYYYMMDD date string (e.g. "20261220") to a readable format.
  */
@@ -43,29 +49,53 @@ const formatDuration = val => {
 };
 
 /**
- * Prettify a snake_case or kebab-case enum key into a readable label.
+ * Prettify a snake_case or kebab-case key into a readable label.
+ */
+const prettifyKey = key => {
+  if (!key) return key;
+  return String(key)
+    .replace(/[-_]/g, ' ')
+    .replace(/\b\w/g, c => c.toUpperCase());
+};
+
+/**
+ * Prettify an enum value for display.
  */
 const prettifyEnum = val => {
-  if (!val) return val;
+  if (val == null) return null;
   return String(val)
     .replace(/[-_]/g, ' ')
     .replace(/\b\w/g, c => c.toUpperCase());
 };
 
 /**
+ * Check if a value looks like a YYYYMMDD date.
+ */
+const isDateValue = (key, val) => {
+  if (typeof val !== 'string' && typeof val !== 'number') return false;
+  const s = String(val);
+  return /^\d{8}$/.test(s) && (key.toLowerCase().includes('date') || parseInt(s.substring(0,4)) > 2000);
+};
+
+/**
+ * Check if a key is a duration-related field.
+ */
+const isDurationKey = key => {
+  const k = key.toLowerCase();
+  return k.includes('duration');
+};
+
+/**
  * Render a multi-enum or array field as styled tag pills.
  */
-const TagSection = ({ icon, title, values }) => {
+const TagSection = ({ title, values }) => {
   if (!values || (Array.isArray(values) && values.length === 0)) return null;
   const items = Array.isArray(values) ? values : [values];
   if (items.length === 0) return null;
 
   return (
     <div className={css.tagSection}>
-      <h3 className={css.tagSectionTitle}>
-        {icon && <span className={css.tagSectionIcon}>{icon}</span>}
-        {title}
-      </h3>
+      <h3 className={css.tagSectionTitle}>{title}</h3>
       <div className={css.tagsGrid}>
         {items.map((item, idx) => (
           <span key={idx} className={css.tag}>
@@ -78,13 +108,12 @@ const TagSection = ({ icon, title, values }) => {
 };
 
 /**
- * A single info card with icon + label + value.
+ * A single info card with label + value.
  */
-const InfoCard = ({ icon, label, value }) => {
-  if (!value) return null;
+const InfoCard = ({ label, value }) => {
+  if (!value && value !== 0) return null;
   return (
     <div className={css.infoCard}>
-      <span className={css.infoIcon}>{icon}</span>
       <div className={css.infoContent}>
         <span className={css.infoLabel}>{label}</span>
         <span className={css.infoValue}>{value}</span>
@@ -116,191 +145,155 @@ const ContactRow = ({ icon, label, value, href }) => {
 };
 
 /**
+ * Format a single value for display based on its key and type.
+ */
+const formatValue = (key, val) => {
+  if (val == null || val === '') return null;
+  if (isDateValue(key, val)) return formatDate(val);
+  if (isDurationKey(key)) return formatDuration(val);
+  if (typeof val === 'boolean') return val ? 'Yes' : 'No';
+  if (typeof val === 'number') return String(val);
+  return prettifyEnum(val);
+};
+
+/**
+ * Dynamically render all publicData fields.
+ * - Arrays render as tag pill sections
+ * - Single values render as info cards
+ * - Grouped under "Details" and "Features & Activities"
+ */
+const DynamicFields = ({ publicData, handledKeys }) => {
+  const singleFields = [];
+  const arrayFields = [];
+
+  Object.entries(publicData).forEach(([key, val]) => {
+    if (SKIP_KEYS.has(key) || handledKeys.has(key)) return;
+    if (val == null || val === '') return;
+    // Skip objects that aren't arrays
+    if (typeof val === 'object' && !Array.isArray(val)) return;
+
+    if (Array.isArray(val)) {
+      arrayFields.push({ key, values: val });
+    } else {
+      const formatted = formatValue(key, val);
+      if (formatted) {
+        singleFields.push({ key, label: prettifyKey(key), value: formatted });
+      }
+    }
+  });
+
+  const hasSingle = singleFields.length > 0;
+  const hasArray = arrayFields.length > 0;
+
+  if (!hasSingle && !hasArray) return null;
+
+  return (
+    <>
+      {hasSingle && (
+        <div className={css.section}>
+          <h2 className={css.sectionTitle}>Details</h2>
+          <div className={css.infoGrid}>
+            {singleFields.map(({ key, label, value }) => (
+              <InfoCard key={key} label={label} value={value} />
+            ))}
+          </div>
+        </div>
+      )}
+
+      {hasArray && (
+        <div className={css.section}>
+          <h2 className={css.sectionTitle}>Features & Activities</h2>
+          <div className={css.tagSectionsGrid}>
+            {arrayFields.map(({ key, values }) => (
+              <TagSection key={key} title={prettifyKey(key)} values={values} />
+            ))}
+          </div>
+        </div>
+      )}
+    </>
+  );
+};
+
+/**
  * SectionExpeditionDetails — renders expedition-specific publicData
- * fields in a visually appealing layout for Trip, Company, Camp, Boat,
- * and Destinations listing types.
+ * fields in a visually appealing layout for all listing types.
+ *
+ * Known fields (departure_date, duration, etc.) get special formatting.
+ * All remaining fields are auto-rendered as info cards or tag sections.
  */
 const SectionExpeditionDetails = props => {
   const { publicData, listingType } = props;
 
   if (!publicData) return null;
 
-  const {
-    // Trip fields
-    departure_date,
-    duration,
-    expedition_type,
-    group_size,
-    difficulty,
-    highlights,
-    whats_included,
-    whats_not_included,
-    itinerary,
-    meeting_point,
-    buyout_price,
-    access,
-    trip_duration_type,
-    duration_in_days,
-    time_departure,
-    arrival_location,
-    arrival_time,
-    party_level,
-    seats_left,
-    rating,
-    comfort_level,
-    // Trip multi-enum fields
-    trip_type,
-    trip_activities,
-    food_option,
-    vibes,
-    crowd_expected,
-    boat_type: tripBoatType,
-    sleeping_location,
-    sleeping_style,
-    retreats,
-    water_toys,
-    max_tribe_size,
+  // Keys that are handled explicitly and should not appear in DynamicFields
+  const handledKeys = new Set();
 
-    // Company fields
-    year_established,
-    yearEstablished,
-    short_description,
-    shortDescription,
-    fleet_size,
-    fleetSize,
-    locations,
-    reservation_phone_number,
-    reservationPhoneNumber,
-    reservation_email,
-    reservationEmail,
-    accounting_email,
-    accountingEmail,
-    manager_name,
-    managerName,
-    manager_whatsapp,
-    managerWhatsApp,
-    manager_email_address,
-    managerEmailAddress,
-    company_website,
-    companyWebsite,
-    instagram,
-    video,
-    google_rating_link,
-    googleRatingLink,
-    camps,
-
-    // Camp fields
-    amenities,
-    capacity,
-    check_in,
-    check_out,
-
-    // Boat fields
-    boat_type,
-    boatType,
-    boat_capacity,
-    boatCapacity,
-    crew_size,
-    crewSize,
-  } = publicData;
-
-  // Normalize camelCase and snake_case field names
-  const yearEst = year_established || yearEstablished;
-  const shortDesc = short_description || shortDescription;
-  const fleetSz = fleet_size || fleetSize;
-  const resPhone = reservation_phone_number || reservationPhoneNumber;
-  const resEmail = reservation_email || reservationEmail;
-  const acctEmail = accounting_email || accountingEmail;
-  const mgrName = manager_name || managerName;
-  const mgrWhatsApp = manager_whatsapp || managerWhatsApp;
-  const mgrEmail = manager_email_address || managerEmailAddress;
-  const website = company_website || companyWebsite;
-  const googleRating = google_rating_link || googleRatingLink;
-  const bType = boat_type || boatType;
-  const bCapacity = boat_capacity || boatCapacity;
-  const cSize = crew_size || crewSize;
+  const val = key => {
+    // Try exact key, then common alternatives
+    const v = publicData[key];
+    if (v != null) { handledKeys.add(key); return v; }
+    return null;
+  };
 
   // === TRIP LISTING TYPE ===
   if (listingType === 'trip' || listingType === 'Trip') {
-    const hasQuickInfo =
-      departure_date || duration || expedition_type || group_size || difficulty;
-    const hasExtraInfo =
-      buyout_price || access || trip_duration_type || time_departure ||
-      arrival_location || arrival_time || party_level || seats_left ||
-      rating || comfort_level || max_tribe_size;
-    const hasInclusions = whats_included || whats_not_included;
-    const hasMultiEnums =
-      trip_type || trip_activities || food_option || vibes ||
-      crowd_expected || tripBoatType || sleeping_location || sleeping_style ||
-      retreats || water_toys;
+    const departureDate = val('departure_date') || val('departureDate');
+    const duration = val('duration') || val('duration_in_days') || val('durationInDays');
+    const expeditionType = val('expedition_type') || val('expeditionType');
+    const groupSize = val('group_size') || val('groupSize');
+    const difficulty = val('difficulty');
+    const meetingPoint = val('meeting_point') || val('meetingPoint');
+    const highlights = val('highlights');
+    const whatsIncluded = val('whats_included') || val('whatsIncluded');
+    const whatsNotIncluded = val('whats_not_included') || val('whatsNotIncluded');
+    const itinerary = val('itinerary');
+    const seatsLeft = val('seats_left') || val('seatsLeft');
+    const rating = val('rating');
+    const comfortLevel = val('comfort_level') || val('comfortLevel');
 
-    if (!hasQuickInfo && !hasExtraInfo && !hasInclusions && !itinerary && !highlights && !meeting_point && !hasMultiEnums) {
-      return null;
-    }
+    const hasQuickInfo = departureDate || duration || expeditionType || groupSize ||
+      difficulty || seatsLeft || rating || comfortLevel;
+    const hasInclusions = whatsIncluded || whatsNotIncluded;
 
     return (
       <div className={css.root}>
         {/* Quick Info Grid */}
-        {(hasQuickInfo || hasExtraInfo) && (
+        {hasQuickInfo && (
           <div className={css.section}>
             <h2 className={css.sectionTitle}>Trip Details</h2>
             <div className={css.infoGrid}>
-              <InfoCard icon="📅" label="Departure Date" value={formatDate(departure_date)} />
-              <InfoCard icon="⏱️" label="Duration" value={formatDuration(duration || duration_in_days)} />
-              <InfoCard icon="🧭" label="Expedition Type" value={prettifyEnum(expedition_type)} />
-              <InfoCard
-                icon="👥"
-                label="Group Size"
-                value={group_size ? `Up to ${group_size} people` : null}
-              />
-              <InfoCard icon="⛰️" label="Difficulty" value={prettifyEnum(difficulty)} />
-              <InfoCard icon="📍" label="Meeting Point" value={meeting_point} />
-              <InfoCard icon="🕐" label="Departure Time" value={time_departure} />
-              <InfoCard icon="📍" label="Arrival Location" value={arrival_location} />
-              <InfoCard icon="🕐" label="Arrival Time" value={arrival_time} />
-              <InfoCard icon="💰" label="Buyout Price" value={buyout_price ? `$${buyout_price}` : null} />
-              <InfoCard icon="🔑" label="Access" value={prettifyEnum(access)} />
-              <InfoCard icon="🎉" label="Party Level" value={prettifyEnum(party_level)} />
-              <InfoCard icon="💺" label="Seats Left" value={seats_left} />
-              <InfoCard icon="⭐" label="Rating" value={rating} />
-              <InfoCard icon="🛏️" label="Comfort Level" value={prettifyEnum(comfort_level)} />
-              <InfoCard icon="👥" label="Max Tribe Size" value={max_tribe_size} />
+              <InfoCard label="Departure Date" value={formatDate(departureDate)} />
+              <InfoCard label="Duration" value={formatDuration(duration)} />
+              <InfoCard label="Expedition Type" value={prettifyEnum(expeditionType)} />
+              <InfoCard label="Group Size" value={groupSize ? `Up to ${groupSize} people` : null} />
+              <InfoCard label="Difficulty" value={prettifyEnum(difficulty)} />
+              <InfoCard label="Meeting Point" value={meetingPoint} />
+              <InfoCard label="Seats Left" value={seatsLeft} />
+              <InfoCard label="Rating" value={rating} />
+              <InfoCard label="Comfort Level" value={prettifyEnum(comfortLevel)} />
             </div>
           </div>
         )}
 
-        {/* Multi-enum tag sections */}
-        {hasMultiEnums && (
-          <div className={css.section}>
-            <h2 className={css.sectionTitle}>Features & Activities</h2>
-            <div className={css.tagSectionsGrid}>
-              <TagSection icon="🏷️" title="Trip Type" values={trip_type} />
-              <TagSection icon="🏄" title="Activities" values={trip_activities} />
-              <TagSection icon="🍽️" title="Food Options" values={food_option} />
-              <TagSection icon="✨" title="Vibes" values={vibes} />
-              <TagSection icon="👥" title="Crowd Expected" values={crowd_expected} />
-              <TagSection icon="⛵" title="Boat Type" values={tripBoatType} />
-              <TagSection icon="🏠" title="Sleeping Location" values={sleeping_location} />
-              <TagSection icon="🛏️" title="Sleeping Style" values={sleeping_style} />
-              <TagSection icon="🧘" title="Retreats" values={retreats} />
-              <TagSection icon="🏄‍♂️" title="Water Toys" values={water_toys} />
-            </div>
-          </div>
-        )}
+        {/* Auto-render remaining single + array fields */}
+        <DynamicFields publicData={publicData} handledKeys={handledKeys} />
 
         {/* Highlights */}
         {highlights && (
           <div className={css.section}>
             <h2 className={css.sectionTitle}>Highlights</h2>
             <div className={css.highlightsList}>
-              {(Array.isArray(highlights) ? highlights : highlights.split('\n')).map(
-                (item, idx) =>
-                  item.trim() && (
+              {(Array.isArray(highlights) ? highlights : String(highlights).split('\n')).map(
+                (item, idx) => {
+                  const text = String(item).trim();
+                  return text ? (
                     <div key={idx} className={css.highlightItem}>
                       <span className={css.checkIcon}>✓</span>
-                      <span>{item.trim()}</span>
+                      <span>{text}</span>
                     </div>
-                  )
+                  ) : null;
+                }
               )}
             </div>
           </div>
@@ -310,43 +303,39 @@ const SectionExpeditionDetails = props => {
         {hasInclusions && (
           <div className={css.section}>
             <div className={css.inclusionsGrid}>
-              {whats_included && (
+              {whatsIncluded && (
                 <div className={css.inclusionBox}>
                   <h3 className={css.inclusionTitle}>
                     <span className={css.includedIcon}>✓</span> What&apos;s Included
                   </h3>
                   <ul className={css.inclusionList}>
-                    {(Array.isArray(whats_included)
-                      ? whats_included
-                      : whats_included.split('\n')
-                    ).map(
-                      (item, idx) =>
-                        item.trim() && (
-                          <li key={idx} className={css.includedItem}>
-                            {item.trim()}
-                          </li>
-                        )
-                    )}
+                    {(Array.isArray(whatsIncluded)
+                      ? whatsIncluded
+                      : String(whatsIncluded).split('\n')
+                    ).map((item, idx) => {
+                      const text = String(item).trim();
+                      return text ? (
+                        <li key={idx} className={css.includedItem}>{text}</li>
+                      ) : null;
+                    })}
                   </ul>
                 </div>
               )}
-              {whats_not_included && (
+              {whatsNotIncluded && (
                 <div className={css.exclusionBox}>
                   <h3 className={css.exclusionTitle}>
                     <span className={css.excludedIcon}>✕</span> Not Included
                   </h3>
                   <ul className={css.inclusionList}>
-                    {(Array.isArray(whats_not_included)
-                      ? whats_not_included
-                      : whats_not_included.split('\n')
-                    ).map(
-                      (item, idx) =>
-                        item.trim() && (
-                          <li key={idx} className={css.excludedItem}>
-                            {item.trim()}
-                          </li>
-                        )
-                    )}
+                    {(Array.isArray(whatsNotIncluded)
+                      ? whatsNotIncluded
+                      : String(whatsNotIncluded).split('\n')
+                    ).map((item, idx) => {
+                      const text = String(item).trim();
+                      return text ? (
+                        <li key={idx} className={css.excludedItem}>{text}</li>
+                      ) : null;
+                    })}
                   </ul>
                 </div>
               )}
@@ -359,14 +348,16 @@ const SectionExpeditionDetails = props => {
           <div className={css.section}>
             <h2 className={css.sectionTitle}>Itinerary</h2>
             <div className={css.itinerary}>
-              {(Array.isArray(itinerary) ? itinerary : itinerary.split('\n')).map(
-                (item, idx) =>
-                  item.trim() && (
+              {(Array.isArray(itinerary) ? itinerary : String(itinerary).split('\n')).map(
+                (item, idx) => {
+                  const text = String(item).trim();
+                  return text ? (
                     <div key={idx} className={css.itineraryDay}>
                       <div className={css.timelineDot} />
-                      <div className={css.itineraryContent}>{item.trim()}</div>
+                      <div className={css.itineraryContent}>{text}</div>
                     </div>
-                  )
+                  ) : null;
+                }
               )}
             </div>
           </div>
@@ -377,12 +368,24 @@ const SectionExpeditionDetails = props => {
 
   // === COMPANY LISTING TYPE ===
   if (listingType === 'company' || listingType === 'Company') {
-    const hasInfo = yearEst || shortDesc || fleetSz || locations || capacity || rating || camps;
+    const shortDesc = val('short_description') || val('shortDescription');
+    const yearEst = val('year_established') || val('yearEstablished');
+    const fleetSz = val('fleet_size') || val('fleetSize');
+    const resPhone = val('reservation_phone_number') || val('reservationPhoneNumber');
+    const resEmail = val('reservation_email') || val('reservationEmail');
+    const acctEmail = val('accounting_email') || val('accountingEmail');
+    const mgrName = val('manager_name') || val('managerName');
+    const mgrWhatsApp = val('manager_whatsapp') || val('managerWhatsApp');
+    const mgrEmail = val('manager_email_address') || val('managerEmailAddress');
+    const website = val('company_website') || val('companyWebsite');
+    const googleRating = val('google_rating_link') || val('googleRatingLink');
+    const instagram = val('instagram');
+    const video = val('video');
+    const locationsList = val('locations');
+
+    const locationStr = Array.isArray(locationsList) ? locationsList.join(', ') : locationsList;
+    const hasInfo = yearEst || fleetSz || locationStr;
     const hasContact = resPhone || resEmail || mgrName || mgrWhatsApp || mgrEmail || website || instagram;
-
-    if (!hasInfo && !hasContact) return null;
-
-    const locationStr = Array.isArray(locations) ? locations.join(', ') : locations;
 
     return (
       <div className={css.root}>
@@ -394,39 +397,36 @@ const SectionExpeditionDetails = props => {
           <div className={css.section}>
             <h2 className={css.sectionTitle}>Company Info</h2>
             <div className={css.infoGrid}>
-              <InfoCard icon="📅" label="Established" value={yearEst} />
-              <InfoCard icon="🚢" label="Fleet Size" value={fleetSz ? `${fleetSz} vessels` : null} />
-              <InfoCard icon="📍" label="Locations" value={locationStr} />
-              <InfoCard icon="👥" label="Capacity" value={capacity} />
-              <InfoCard icon="⭐" label="Rating" value={rating} />
+              <InfoCard label="Established" value={yearEst} />
+              <InfoCard label="Fleet Size" value={fleetSz ? `${fleetSz} vessels` : null} />
+              <InfoCard label="Locations" value={locationStr} />
             </div>
           </div>
         )}
 
-        {camps && (
-          <TagSection icon="🏕️" title="Camps" values={camps} />
-        )}
+        {/* Auto-render remaining fields */}
+        <DynamicFields publicData={publicData} handledKeys={handledKeys} />
 
         {hasContact && (
           <div className={css.section}>
             <h2 className={css.sectionTitle}>Contact & Links</h2>
             <div className={css.contactGrid}>
-              <ContactRow icon="📞" label="Reservations" value={resPhone} href={`tel:${resPhone}`} />
-              <ContactRow icon="✉️" label="Email" value={resEmail} href={`mailto:${resEmail}`} />
-              <ContactRow icon="💼" label="Accounting" value={acctEmail} href={`mailto:${acctEmail}`} />
+              <ContactRow icon="📞" label="Reservations" value={resPhone} href={resPhone ? `tel:${resPhone}` : null} />
+              <ContactRow icon="✉️" label="Email" value={resEmail} href={resEmail ? `mailto:${resEmail}` : null} />
+              <ContactRow icon="💼" label="Accounting" value={acctEmail} href={acctEmail ? `mailto:${acctEmail}` : null} />
               <ContactRow icon="👤" label="Manager" value={mgrName} />
               <ContactRow
                 icon="💬"
                 label="WhatsApp"
                 value={mgrWhatsApp}
-                href={mgrWhatsApp ? `https://wa.me/${mgrWhatsApp.replace(/[^0-9]/g, '')}` : null}
+                href={mgrWhatsApp ? `https://wa.me/${String(mgrWhatsApp).replace(/[^0-9]/g, '')}` : null}
               />
-              <ContactRow icon="✉️" label="Manager Email" value={mgrEmail} href={`mailto:${mgrEmail}`} />
+              <ContactRow icon="✉️" label="Manager Email" value={mgrEmail} href={mgrEmail ? `mailto:${mgrEmail}` : null} />
               <ContactRow
                 icon="🌐"
                 label="Website"
                 value={website}
-                href={website?.startsWith('http') ? website : `https://${website}`}
+                href={website ? (String(website).startsWith('http') ? website : `https://${website}`) : null}
               />
               <ContactRow
                 icon="📸"
@@ -434,9 +434,9 @@ const SectionExpeditionDetails = props => {
                 value={instagram}
                 href={
                   instagram
-                    ? instagram.startsWith('http')
+                    ? String(instagram).startsWith('http')
                       ? instagram
-                      : `https://instagram.com/${instagram.replace('@', '')}`
+                      : `https://instagram.com/${String(instagram).replace('@', '')}`
                     : null
                 }
               />
@@ -451,7 +451,7 @@ const SectionExpeditionDetails = props => {
             <div className={css.videoWrapper}>
               <iframe
                 className={css.videoIframe}
-                src={video.replace('watch?v=', 'embed/')}
+                src={String(video).replace('watch?v=', 'embed/')}
                 title="Company Video"
                 frameBorder="0"
                 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
@@ -466,80 +466,92 @@ const SectionExpeditionDetails = props => {
 
   // === CAMP LISTING TYPE ===
   if (listingType === 'camp' || listingType === 'Camp') {
-    const hasInfo = capacity || check_in || check_out || amenities;
-    if (!hasInfo) return null;
+    const capacity = val('capacity');
+    const checkIn = val('check_in') || val('checkIn');
+    const checkOut = val('check_out') || val('checkOut');
+
+    const hasInfo = capacity || checkIn || checkOut;
 
     return (
       <div className={css.root}>
-        <div className={css.section}>
-          <h2 className={css.sectionTitle}>Camp Details</h2>
-          <div className={css.infoGrid}>
-            <InfoCard icon="👥" label="Capacity" value={capacity ? `${capacity} guests` : null} />
-            <InfoCard icon="🕐" label="Check-in" value={check_in} />
-            <InfoCard icon="🕐" label="Check-out" value={check_out} />
-          </div>
-        </div>
-
-        {amenities && (
+        {hasInfo && (
           <div className={css.section}>
-            <h2 className={css.sectionTitle}>Amenities</h2>
-            <div className={css.tagsGrid}>
-              {(Array.isArray(amenities) ? amenities : [amenities]).map((item, idx) => (
-                <span key={idx} className={css.tag}>
-                  {prettifyEnum(item)}
-                </span>
-              ))}
+            <h2 className={css.sectionTitle}>Camp Details</h2>
+            <div className={css.infoGrid}>
+              <InfoCard label="Capacity" value={capacity ? `${capacity} guests` : null} />
+              <InfoCard label="Check-in" value={checkIn} />
+              <InfoCard label="Check-out" value={checkOut} />
             </div>
           </div>
         )}
+
+        <DynamicFields publicData={publicData} handledKeys={handledKeys} />
       </div>
     );
   }
 
   // === BOAT LISTING TYPE ===
   if (listingType === 'boat' || listingType === 'Boat') {
-    const hasInfo = bType || bCapacity || cSize || fleetSz;
-    if (!hasInfo) return null;
+    const bType = val('boat_type') || val('boatType');
+    const bCapacity = val('boat_capacity') || val('boatCapacity');
+    const cSize = val('crew_size') || val('crewSize');
+
+    const hasInfo = bType || bCapacity || cSize;
 
     return (
       <div className={css.root}>
-        <div className={css.section}>
-          <h2 className={css.sectionTitle}>Boat Specifications</h2>
-          <div className={css.infoGrid}>
-            <InfoCard icon="⛵" label="Boat Type" value={prettifyEnum(bType)} />
-            <InfoCard icon="👥" label="Capacity" value={bCapacity ? `${bCapacity} passengers` : null} />
-            <InfoCard icon="👨‍✈️" label="Crew Size" value={cSize} />
+        {hasInfo && (
+          <div className={css.section}>
+            <h2 className={css.sectionTitle}>Boat Specifications</h2>
+            <div className={css.infoGrid}>
+              <InfoCard label="Boat Type" value={prettifyEnum(bType)} />
+              <InfoCard label="Capacity" value={bCapacity ? `${bCapacity} passengers` : null} />
+              <InfoCard label="Crew Size" value={cSize} />
+            </div>
           </div>
-        </div>
+        )}
+
+        <DynamicFields publicData={publicData} handledKeys={handledKeys} />
       </div>
     );
   }
 
   // === DESTINATIONS LISTING TYPE ===
   if (listingType === 'destinations' || listingType === 'Destinations') {
-    if (!highlights) return null;
+    const highlights = val('highlights');
 
     return (
       <div className={css.root}>
-        <div className={css.section}>
-          <h2 className={css.sectionTitle}>Highlights</h2>
-          <div className={css.highlightsList}>
-            {(Array.isArray(highlights) ? highlights : highlights.split('\n')).map(
-              (item, idx) =>
-                item.trim() && (
-                  <div key={idx} className={css.highlightItem}>
-                    <span className={css.checkIcon}>✓</span>
-                    <span>{item.trim()}</span>
-                  </div>
-                )
-            )}
+        {highlights && (
+          <div className={css.section}>
+            <h2 className={css.sectionTitle}>Highlights</h2>
+            <div className={css.highlightsList}>
+              {(Array.isArray(highlights) ? highlights : String(highlights).split('\n')).map(
+                (item, idx) => {
+                  const text = String(item).trim();
+                  return text ? (
+                    <div key={idx} className={css.highlightItem}>
+                      <span className={css.checkIcon}>✓</span>
+                      <span>{text}</span>
+                    </div>
+                  ) : null;
+                }
+              )}
+            </div>
           </div>
-        </div>
+        )}
+
+        <DynamicFields publicData={publicData} handledKeys={handledKeys} />
       </div>
     );
   }
 
-  return null;
+  // For any other listing type, auto-render all fields
+  return (
+    <div className={css.root}>
+      <DynamicFields publicData={publicData} handledKeys={handledKeys} />
+    </div>
+  );
 };
 
 export default SectionExpeditionDetails;
