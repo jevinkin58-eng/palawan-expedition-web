@@ -3,216 +3,297 @@
 // Main configuration here is the extended data config //
 /////////////////////////////////////////////////////////
 
-// Note: The listingFields come from listingFields asset nowadays by default.
+// Note: The listingFields come from listingTypes asset nowadays by default.
 //       To use this built-in configuration, you need to change the overwrite from configHelper.js
 //       (E.g. use mergeDefaultTypesAndFieldsForDebugging func)
 
 /**
  * Configuration options for listing fields (custom extended data fields):
- * - key:                           Unique key for the extended data field.
- * - scope (optional):              Scope of the extended data can be 'public', 'private', or 'metadata'.
- *                                  Default value: 'public'.
- *                                  Note: listing doesn't support 'protected' scope atm.
- * - schemaType (optional):         Schema for this extended data field.
- *                                  This is relevant when rendering components and querying listings.
- *                                  Possible values: 'enum', 'multi-enum', 'text', 'long', 'boolean'.
- * - enumOptions (optional):        Options shown for 'enum' and 'multi-enum' extended data.
- *                                  These are used to render options for inputs and filters on
- *                                  EditListingPage, ListingPage, and SearchPage.
- * - listingTypeConfig (optional):  Relationship configuration against listing types.
- *   - limitToListingTypeIds:         Indicator whether this listing field is relevant to a limited set of listing types.
- *   - listingTypeIds:                An array of listing types, for which this custom listing field is
- *                                    relevant and should be added. This is mandatory if limitToListingTypeIds is true.
- * - categoryConfig (optional):     Relationship configuration against categories.
- *   - limitToCategoryIds:            Indicator whether this listing field is relevant to a limited set of categories.
- *   - categoryIds:                   An array of categories, for which this custom listing field is
- *                                    relevant and should be added. This is mandatory if limitToCategoryIds is true.
- * - filterConfig:                  Filter configuration for listings query.
- *    - indexForSearch (optional):    If set as true, it is assumed that the extended data key has
- *                                    search index in place. I.e. the key can be used to filter
- *                                    listing queries (then scope needs to be 'public').
- *                                    Note: Sharetribe CLI can be used to set search index for the key:
- *                                    https://www.sharetribe.com/docs/references/extended-data/#search-schema
- *                                    Read more about filtering listings with public data keys from API Reference:
- *                                    https://www.sharetribe.com/api-reference/marketplace.html#extended-data-filtering
- *                                    Default value: false,
- *   - filterType:                    Sometimes a single schemaType can be rendered with different filter components.
- *                                    For 'enum' schema, filterType can be 'SelectSingleFilter' or 'SelectMultipleFilter'
- *   - label:                         Label for the filter, if the field can be used as query filter
- *   - searchMode (optional):         Search mode for indexed data with multi-enum schema.
- *                                    Possible values: 'has_all' or 'has_any'.
- *   - group:                         SearchPageWithMap has grouped filters. Possible values: 'primary' or 'secondary'.
- * - showConfig:                    Configuration for rendering listing. (How the field should be shown.)
- *   - label:                         Label for the saved data.
- *   - isDetail                       Can be used to hide detail row (of type enum, boolean, or long) from listing page.
- *                                    Default value: true,
- * - saveConfig:                    Configuration for adding and modifying extended data fields.
- *   - label:                         Label for the input field.
- *   - placeholderMessage (optional): Default message for user input.
- *   - isRequired (optional):         Is the field required for providers to fill
- *   - requiredMessage (optional):    Message for those fields, which are mandatory.
+ * - key, scope, schemaType, enumOptions, filterConfig, showConfig, saveConfig
+ * See Sharetribe docs for full reference.
  */
 export const listingFields = [
-  // {
-  //   "scope": "public",
-  //   "label": "Gears",
-  //   "key": "gears",
-  //   "schemaType": "long",
-  //   "numberConfig": {
-  //     "minimum": 1,
-  //     "maximum": 24
-  //   },
-  //   "filterConfig": {
-  //     "indexForSearch": true,
-  //     "group": "primary",
-  //     "label": "Gears"
-  //   }
-  // }
-  // {
-  //   key: 'bikeType',
-  //   scope: 'public',
-  //   schemaType: 'enum',
-  //   enumOptions: [
-  //     { option: 'city-bikes', label: 'City bikes' },
-  //     { option: 'electric-bikes', label: 'Electric bikes' },
-  //     { option: 'mountain-bikes', label: 'Mountain bikes' },
-  //     { option: 'childrens-bikes', label: "Children's bikes" },
-  //   ],
-  //   categoryConfig: {
-  //     limitToCategoryIds: true,
-  //     categoryIds: ['cats'],
-  //   },
-  //   filterConfig: {
-  //     showFilter: true,
-  //     filterType: 'SelectMultipleFilter', //'SelectSingleFilter',
-  //     label: 'Bike type',
-  //     group: 'primary',
-  //   },
-  //   showConfig: {
-  //     label: 'Bike type',
-  //     isDetail: true,
-  //   },
-  //   saveConfig: {
-  //     label: 'Bike type',
-  //     placeholderMessage: 'Select an option…',
-  //     isRequired: true,
-  //     requiredMessage: 'You need to select a bike type.',
-  //   },
-  // },
-  // {
-  //   key: 'tire',
-  //   scope: 'public',
-  //   schemaType: 'enum',
-  //   enumOptions: [
-  //     { option: '29', label: '29' },
-  //     { option: '28', label: '28' },
-  //     { option: '27', label: '27' },
-  //     { option: '26', label: '26' },
-  //     { option: '24', label: '24' },
-  //     { option: '20', label: '20' },
-  //     { option: '18', label: '18' },
-  //   ],
-  //   filterConfig: {
-  //     showFilter: true,
-  //     label: 'Tire size',
-  //     group: 'secondary',
-  //   },
-  //   showConfig: {
-  //     label: 'Tire size',
-  //     isDetail: true,
-  //   },
-  //   saveConfig: {
-  //     label: 'Tire size',
-  //     placeholderMessage: 'Select an option…',
-  //     isRequired: true,
-  //     requiredMessage: 'You need to select a tire size.',
-  //   },
-  // },
-  // {
-  //   key: 'brand',
-  //   scope: 'public',
-  //   schemaType: 'enum',
-  //   enumOptions: [
-  //     { option: 'cube', label: 'Cube' },
-  //     { option: 'diamant', label: 'Diamant' },
-  //     { option: 'ghost', label: 'GHOST' },
-  //     { option: 'giant', label: 'Giant' },
-  //     { option: 'kalkhoff', label: 'Kalkhoff' },
-  //     { option: 'kona', label: 'Kona' },
-  //     { option: 'otler', label: 'Otler' },
-  //     { option: 'vermont', label: 'Vermont' },
-  //   ],
-  //   filterConfig: {
-  //     showFilter: true,
-  //     label: 'Brand',
-  //     group: 'secondary',
-  //   },
-  //   showConfig: {
-  //     label: 'Brand',
-  //     isDetail: true,
-  //   },
-  //   saveConfig: {
-  //     label: 'Brand',
-  //     placeholderMessage: 'Select an option…',
-  //     isRequired: true,
-  //     requiredMessage: 'You need to select a brand.',
-  //   },
-  // },
-  // {
-  //   key: 'accessories',
-  //   scope: 'public',
-  //   schemaType: 'multi-enum',
-  //   enumOptions: [
-  //     { option: 'bell', label: 'Bell' },
-  //     { option: 'lights', label: 'Lights' },
-  //     { option: 'lock', label: 'Lock' },
-  //     { option: 'mudguard', label: 'Mudguard' },
-  //   ],
-  //   filterConfig: {
-  //     showFilter: true,
-  //     label: 'Accessories',
-  //     searchMode: 'has_all',
-  //     group: 'secondary',
-  //   },
-  //   showConfig: {
-  //     label: 'Accessories',
-  //   },
-  //   saveConfig: {
-  //     label: 'Accessories',
-  //     placeholderMessage: 'Select an option…',
-  //     isRequired: false,
-  //   },
-  // },
-  // // An example of how to use transaction type specific custom fields and private data.
-  // {
-  //   key: 'note',
-  //   scope: 'public',
-  //   schemaType: 'text',
-  //   listingTypeConfig: {
-  //     limitToListingTypeIds: true,
-  //     listingTypeIds: ['product-selling'],
-  //   },
-  //   showConfig: {
-  //     label: 'Extra notes',
-  //   },
-  //   saveConfig: {
-  //     label: 'Extra notes',
-  //     placeholderMessage: 'Some public extra note about this bike...',
-  //   },
-  // },
-  // {
-  //   key: 'privatenote',
-  //   scope: 'private',
-  //   schemaType: 'text',
-  //   listingTypeConfig: {
-  //     limitToListingTypeIds: true,
-  //     listingTypeIds: ['daily-booking'],
-  //   },
-  //   saveConfig: {
-  //     label: 'Private notes',
-  //     placeholderMessage: 'Some private note about this bike...',
-  //   },
-  // },
+  // ─── Expedition Type (enum) ─────────────────────────────────
+  {
+    key: 'expeditiontype',
+    scope: 'public',
+    schemaType: 'enum',
+    enumOptions: [
+      { option: 'islandHopping', label: 'Island Hopping' },
+      { option: 'diving', label: 'Diving' },
+      { option: 'sailing', label: 'Sailing' },
+      { option: 'kayaking', label: 'Kayaking' },
+      { option: 'snorkeling', label: 'Snorkeling' },
+      { option: 'camping', label: 'Camping' },
+      { option: 'trekking', label: 'Trekking' },
+      { option: 'fishing', label: 'Fishing' },
+      { option: 'cultural', label: 'Cultural' },
+      { option: 'wildlife', label: 'Wildlife' },
+      { option: 'photography', label: 'Photography' },
+      { option: 'wellness', label: 'Wellness' },
+    ],
+    filterConfig: {
+      indexForSearch: true,
+      filterType: 'SelectSingleFilter',
+      label: 'Expedition Type',
+      group: 'primary',
+    },
+    showConfig: {
+      label: 'Expedition Type',
+      isDetail: true,
+    },
+    saveConfig: {
+      label: 'Expedition Type',
+      placeholderMessage: 'Select expedition type…',
+      isRequired: false,
+    },
+  },
+
+  // ─── Trip Activities (multi-enum) ───────────────────────────
+  {
+    key: 'tripactivities',
+    scope: 'public',
+    schemaType: 'multi-enum',
+    enumOptions: [
+      { option: 'diving', label: 'Diving' },
+      { option: 'snorkeling', label: 'Snorkeling' },
+      { option: 'kayaking', label: 'Kayaking' },
+      { option: 'swimming', label: 'Swimming' },
+      { option: 'hiking', label: 'Hiking' },
+      { option: 'fishing', label: 'Fishing' },
+      { option: 'surfing', label: 'Surfing' },
+      { option: 'paddleboarding', label: 'Paddleboarding' },
+      { option: 'camping', label: 'Camping' },
+      { option: 'rockClimbing', label: 'Rock Climbing' },
+      { option: 'birdWatching', label: 'Bird Watching' },
+      { option: 'photography', label: 'Photography' },
+      { option: 'cooking', label: 'Cooking' },
+      { option: 'yoga', label: 'Yoga' },
+      { option: 'meditation', label: 'Meditation' },
+    ],
+    filterConfig: {
+      indexForSearch: true,
+      filterType: 'SelectMultipleFilter',
+      label: 'Activities',
+      searchMode: 'has_any',
+      group: 'primary',
+    },
+    showConfig: {
+      label: 'Activities',
+    },
+    saveConfig: {
+      label: 'Activities',
+      placeholderMessage: 'Select activities…',
+      isRequired: false,
+    },
+  },
+
+  // ─── Boat Type (enum) ───────────────────────────────────────
+  {
+    key: 'boattype',
+    scope: 'public',
+    schemaType: 'enum',
+    enumOptions: [
+      { option: 'bangka', label: 'Bangka' },
+      { option: 'catamaran', label: 'Catamaran' },
+      { option: 'sailboat', label: 'Sailboat' },
+      { option: 'speedboat', label: 'Speedboat' },
+      { option: 'yacht', label: 'Yacht' },
+      { option: 'kayak', label: 'Kayak' },
+      { option: 'diveBoat', label: 'Dive Boat' },
+      { option: 'ferry', label: 'Ferry' },
+    ],
+    filterConfig: {
+      indexForSearch: true,
+      filterType: 'SelectSingleFilter',
+      label: 'Boat Type',
+      group: 'secondary',
+    },
+    showConfig: {
+      label: 'Boat Type',
+      isDetail: true,
+    },
+    saveConfig: {
+      label: 'Boat Type',
+      placeholderMessage: 'Select boat type…',
+      isRequired: false,
+    },
+  },
+
+  // ─── Comfort Level (enum) ───────────────────────────────────
+  {
+    key: 'comfortlevel',
+    scope: 'public',
+    schemaType: 'enum',
+    enumOptions: [
+      { option: 'budget', label: 'Budget' },
+      { option: 'standard', label: 'Standard' },
+      { option: 'comfort', label: 'Comfort' },
+      { option: 'luxury', label: 'Luxury' },
+    ],
+    filterConfig: {
+      indexForSearch: true,
+      filterType: 'SelectSingleFilter',
+      label: 'Comfort Level',
+      group: 'primary',
+    },
+    showConfig: {
+      label: 'Comfort Level',
+      isDetail: true,
+    },
+    saveConfig: {
+      label: 'Comfort Level',
+      placeholderMessage: 'Select comfort level…',
+      isRequired: false,
+    },
+  },
+
+  // ─── Group Size (enum) ──────────────────────────────────────
+  {
+    key: 'groupsize',
+    scope: 'public',
+    schemaType: 'enum',
+    enumOptions: [
+      { option: 'solo', label: 'Solo (1)' },
+      { option: 'small', label: 'Small (2-6)' },
+      { option: 'medium', label: 'Medium (7-15)' },
+      { option: 'large', label: 'Large (16-30)' },
+      { option: 'extraLarge', label: 'Extra Large (30+)' },
+    ],
+    filterConfig: {
+      indexForSearch: true,
+      filterType: 'SelectSingleFilter',
+      label: 'Group Size',
+      group: 'secondary',
+    },
+    showConfig: {
+      label: 'Group Size',
+      isDetail: true,
+    },
+    saveConfig: {
+      label: 'Group Size',
+      placeholderMessage: 'Select group size…',
+      isRequired: false,
+    },
+  },
+
+  // ─── Vibes (multi-enum) ─────────────────────────────────────
+  {
+    key: 'vibes',
+    scope: 'public',
+    schemaType: 'multi-enum',
+    enumOptions: [
+      { option: 'adventurous', label: 'Adventurous' },
+      { option: 'relaxed', label: 'Relaxed' },
+      { option: 'social', label: 'Social' },
+      { option: 'romantic', label: 'Romantic' },
+      { option: 'family', label: 'Family-Friendly' },
+      { option: 'party', label: 'Party' },
+      { option: 'spiritual', label: 'Spiritual' },
+      { option: 'educational', label: 'Educational' },
+      { option: 'eco', label: 'Eco-Friendly' },
+    ],
+    filterConfig: {
+      indexForSearch: true,
+      filterType: 'SelectMultipleFilter',
+      label: 'Vibes',
+      searchMode: 'has_any',
+      group: 'secondary',
+    },
+    showConfig: {
+      label: 'Vibes',
+    },
+    saveConfig: {
+      label: 'Vibes',
+      placeholderMessage: 'Select vibes…',
+      isRequired: false,
+    },
+  },
+
+  // ─── Trip Type (multi-enum) ─────────────────────────────────
+  {
+    key: 'triptype',
+    scope: 'public',
+    schemaType: 'multi-enum',
+    enumOptions: [
+      { option: 'dayTrip', label: 'Day Trip' },
+      { option: 'overnight', label: 'Overnight' },
+      { option: 'multiDay', label: 'Multi-Day' },
+      { option: 'expedition', label: 'Expedition' },
+      { option: 'liveaboard', label: 'Liveaboard' },
+    ],
+    filterConfig: {
+      indexForSearch: true,
+      filterType: 'SelectMultipleFilter',
+      label: 'Trip Type',
+      searchMode: 'has_any',
+      group: 'secondary',
+    },
+    showConfig: {
+      label: 'Trip Type',
+    },
+    saveConfig: {
+      label: 'Trip Type',
+      placeholderMessage: 'Select trip type…',
+      isRequired: false,
+    },
+  },
+
+  // ─── Sleeping Style (multi-enum) ────────────────────────────
+  {
+    key: 'sleepingstyle',
+    scope: 'public',
+    schemaType: 'multi-enum',
+    enumOptions: [
+      { option: 'tent', label: 'Tent' },
+      { option: 'hammock', label: 'Hammock' },
+      { option: 'cabin', label: 'Cabin' },
+      { option: 'dorm', label: 'Dorm' },
+      { option: 'privateRoom', label: 'Private Room' },
+      { option: 'openAir', label: 'Open Air' },
+      { option: 'boat', label: 'On Boat' },
+    ],
+    filterConfig: {
+      indexForSearch: true,
+      filterType: 'SelectMultipleFilter',
+      label: 'Sleeping Style',
+      searchMode: 'has_any',
+      group: 'secondary',
+    },
+    showConfig: {
+      label: 'Sleeping Style',
+    },
+    saveConfig: {
+      label: 'Sleeping Style',
+      placeholderMessage: 'Select sleeping style…',
+      isRequired: false,
+    },
+  },
+
+  // ─── Duration in Days (long / range filter) ─────────────────
+  {
+    key: 'durationindays',
+    scope: 'public',
+    schemaType: 'long',
+    numberConfig: {
+      minimum: 1,
+      maximum: 30,
+    },
+    filterConfig: {
+      indexForSearch: true,
+      label: 'Duration (days)',
+      group: 'primary',
+    },
+    showConfig: {
+      label: 'Duration',
+      isDetail: true,
+    },
+    saveConfig: {
+      label: 'Duration (days)',
+      placeholderMessage: 'Enter number of days…',
+      isRequired: false,
+    },
+  },
 ];
 
 ///////////////////////////////////////////////////////////////////////
@@ -229,228 +310,12 @@ export const listingFields = [
 
 /**
  * Configuration options for listing experience:
- * - listingType:         Unique string. This will be saved to listing's public data on
- *                        EditListingWizard.
- * - label                Label for the listing type. Used as microcopy for options to select
- *                        listing type in EditListingWizard.
- * - transactionType      Set of configurations how this listing type will behave when transaction is
- *                        created.
- *   - process              Transaction process.
- *                          The process must match one of the processes that this client app can handle
- *                          (check src/util/transactions/transaction.js) and the process must also exists in correct
- *                          marketplace environment.
- *   - alias                Valid alias for the aforementioned process. This will be saved to listing's
- *                          public data as transctionProcessAlias and transaction is initiated with this.
- *   - unitType             Unit type is mainly used as pricing unit. This will be saved to
- *                          transaction's protected data.
- *                          Recommendation: don't use same unit types in completely different processes
- *                          ('item' sold should not be priced the same as 'item' booked).
- * - stockType            This is relevant only to listings using default-purchase process.
- *                        If set to 'oneItem', stock management is not showed and the listing is
- *                        considered unique (stock = 1).
- *                        Possible values: 'oneItem', 'multipleItems', 'infiniteOneItem', and 'infiniteMultipleItems'.
- *                        Default: 'multipleItems'.
- * - availabilityType     This is relevant only to listings using default-booking process.
- *                        If set to 'oneSeat', seat management is not showed and the listing is
- *                        considered per person (seat = 1).
- *                        Possible values: 'oneSeat' and 'multipleSeats'.
- *                        Default: 'oneSeat'.
- * - priceVariations      This is relevant only to listings using default-booking process.
- *   - enabled:             If set to true, price variations are enabled.
- *                          Default: false.
- * - defaultListingFields These are tied to transaction processes. Different processes have different flags.
- *                        E.g. default-inquiry can toggle price and location to true/false value to indicate,
- *                        whether price (or location) tab should be shown. If defaultListingFields.price is not
- *                        explicitly set to _false_, price will be shown.
- *                        If the location or pickup is not used, listing won't be returned with location search.
- *                        Use keyword search as main search type if location is not enforced.
- *                        The payoutDetails flag allows provider to bypass setting of payout details.
- *                        Note: customers can't order listings, if provider has not set payout details! Monitor
- *                        providers who have not set payout details and contact them to ensure that they add the details.
- * - transactionFields    You can define an array of custom transaction fields for each listing type. Each transaction field
- *                        should have the following attributes:
- *                        - key (string)
- *                        - label (string)
- *                        - showTo (string, options: 'customer', 'provider'). Option 'provider' is only used for negotiation process.
- *                        - schemaType (string, options: 'enum', 'multi-enum', 'text', 'long', 'boolean', 'youtubeVideoUrl')
- *                        - saveConfig (object, optional,  { required: true })
- *                        - schema specific attributes:
- *                          - numberConfig (object, for schemaType: 'long'): { minimum: number, maximum: number }
- *                          - enumOptions (array, for schemaType: 'enum', 'multi-enum'): [{ label: string, option: string }]
- * - messagingOptions     Options for the messaging experience
- *  - fileAttachments:    - if set to true, uploading file attachments to messages is enabled. Marketplace level access control
- *                          configuration may still disable uploading and downloading files, even if enabled in the listing type.
+ * - listingType, label, transactionType, stockType, availabilityType, etc.
+ * See Sharetribe docs for full reference.
  */
 
 export const listingTypes = [
-  // // Here are some examples of listingTypes
-  // // TODO: SearchPage does not work well if both booking and product selling are used at the same time
-  // {
-  //   listingType: 'daily-booking',
-  //   label: 'Daily booking',
-  //   transactionType: {
-  //     process: 'default-booking',
-  //     alias: 'default-booking/release-1',
-  //     unitType: 'day',
-  //   },
-  //   availabilityType: 'oneSeat',
-  //   defaultListingFields: {
-  //     location: true,
-  //     payoutDetails: true,
-  //   },
-  //   transactionFields: [
-  //     {
-  //       showTo: 'customer',
-  //       label: 'Extra requests for the hosts',
-  //       key: 'requests',
-  //       schemaType: 'text',
-  //     },
-  //     {
-  //       showTo: 'customer',
-  //       label: 'Are you traveling with minors?',
-  //       key: 'minors',
-  //       schemaType: 'boolean',
-  //     },
-  //     {
-  //       showTo: 'customer',
-  //       numberConfig: {
-  //         minimum: 1,
-  //         maximum: 10,
-  //       },
-  //       label: 'How many people are staying at the venue',
-  //       key: 'peopleStaying',
-  //       schemaType: 'long',
-  //       saveConfig: {
-  //         required: true,
-  //       },
-  //     },
-  //     {
-  //       showTo: 'customer',
-  //       enumOptions: [
-  //         {
-  //           label: 'Morning cleanup (10am-12am)',
-  //           option: 'morning',
-  //         },
-  //         {
-  //           label: 'Afternoon cleanup (2pm-4pm)',
-  //           option: 'afternoon',
-  //         },
-  //       ],
-  //       label: 'Schedule preference',
-  //       key: 'schedulePreference',
-  //       schemaType: 'enum',
-  //     },
-  //     {
-  //       showTo: 'customer',
-  //       enumOptions: [
-  //         {
-  //           label: 'Vegetarian',
-  //           option: 'vegetarian',
-  //         },
-  //         {
-  //           label: 'Vegan',
-  //           option: 'vegan',
-  //         },
-  //         {
-  //           label: 'Gluten free',
-  //           option: 'glutenFree',
-  //         },
-  //         {
-  //           label: 'No caffeine',
-  //           option: 'decaf',
-  //         },
-  //         {
-  //           label: 'Nut free',
-  //           option: 'nutFree',
-  //         },
-  //         {
-  //           label: 'Dairy free',
-  //           option: 'dairyFree',
-  //         },
-  //       ],
-  //       label: 'Dietary preferences',
-  //       key: 'dietaryPreferences',
-  //       schemaType: 'multi-enum',
-  //     },
-  //   ],
-  //   messagingOptions	{ fileAttachments: false }
-  // },
-  // {
-  //   listingType: 'nightly-booking',
-  //   label: 'Nightly booking',
-  //   transactionType: {
-  //     process: 'default-booking',
-  //     alias: 'default-booking/release-1',
-  //     unitType: 'night',
-  //   },
-  // },
-  // {
-  //   listingType: 'hourly-booking',
-  //   label: 'Hourly booking',
-  //   transactionType: {
-  //     process: 'default-booking',
-  //     alias: 'default-booking/release-1',
-  //     unitType: 'hour',
-  //   },
-  // },
-  // {
-  //   listingType: 'product-selling',
-  //   label: 'Sell bicycles',
-  //   transactionType: {
-  //     process: 'default-purchase',
-  //     alias: 'default-purchase/release-1',
-  //     unitType: 'item',
-  //   },
-  //   stockType: 'multipleItems',
-  //   defaultListingFields: {
-  //     shipping: true,
-  //     pickup: true,
-  //     payoutDetails: true,
-  //   },
-  // },
-  // {
-  //   listingType: 'inquiry',
-  //   label: 'Inquiry',
-  //   transactionType: {
-  //     process: 'default-inquiry',
-  //     alias: 'default-inquiry/release-1',
-  //     unitType: 'inquiry',
-  //   },
-  //   defaultListingFields: {
-  //     price: false,
-  //     location: true,
-  //   },
-  // },
-  //   {
-  //   label: 'Digital file upload',
-  //   listingType: 'digital-file',
-  //   transactionType: {
-  //     process: 'default-download',
-  //     alias: 'default-download/release-1',
-  //     unitType: 'file',
-  //   },
-  //   transactionFields: [
-  //     {
-  //       label: 'Arbitrary field',
-  //       key: 'arbitrary',
-  //       schemaType: 'shortText',
-  //       showTo: 'customer',
-  //       helpText: 'A text field with a 70 char limit',
-  //     },
-  //   ],
-  //   defaultListingFields: {
-  //     description: true,
-  //     availability: false,
-  //     payoutDetails: true,
-  //     images: false,
-  //     pickup: false,
-  //     title: true,
-  //     shipping: false,
-  //     location: false,
-  //     price: true,
-  //     stock: false,
-  //   },
-  // },
+  // Listing types come from hosted assets (Console)
 ];
 
 // SearchPage can enforce listing query to only those listings with valid listingType

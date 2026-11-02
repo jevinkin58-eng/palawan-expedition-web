@@ -1379,15 +1379,28 @@ const mergeListingConfig = (hostedConfig, defaultConfigs, categoriesInUse) => {
   const { listingTypes: defaultListingTypes, listingFields: defaultListingFields, ...rest } =
     defaultConfigs.listing || {};
 
-  // When debugging, include default configs by passing 'true' here.
-  // Otherwise, use listing types and fields from hosted assets.
-  const shouldMerge = mergeDefaultTypesAndFieldsForDebugging(false);
+  // Merge local listing field configs (filters) with hosted assets.
+  const shouldMerge = mergeDefaultTypesAndFieldsForDebugging(true);
   const listingTypes = shouldMerge
     ? union(hostedListingTypes, defaultListingTypes, 'listingType')
     : hostedListingTypes;
-  const listingFields = shouldMerge
+  const mergedListingFields = shouldMerge
     ? union(hostedListingFields, defaultListingFields, 'key')
     : hostedListingFields;
+
+  // Only show filters for fields defined in the local config (defaultListingFields).
+  // Console-only fields keep their data but won't appear as search filters.
+  const localFieldKeys = (defaultListingFields || []).map(f => f.key);
+  const listingFields = mergedListingFields.map(field => {
+    if (localFieldKeys.length > 0 && !localFieldKeys.includes(field.key)) {
+      // Strip filter visibility from Console-only fields
+      const { filterConfig, ...restField } = field;
+      return filterConfig
+        ? { ...restField, filterConfig: { ...filterConfig, showFilter: false } }
+        : restField;
+    }
+    return field;
+  });
 
   const listingTypesInUse = listingTypes.map(lt => `${lt.listingType}`);
 
