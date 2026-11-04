@@ -34,6 +34,7 @@ export const listingFields = [
     ],
     filterConfig: {
       indexForSearch: true,
+      showFilter: true,
       filterType: 'SelectSingleFilter',
       label: 'Expedition Type',
       group: 'primary',
@@ -73,6 +74,7 @@ export const listingFields = [
     ],
     filterConfig: {
       indexForSearch: true,
+      showFilter: true,
       filterType: 'SelectMultipleFilter',
       label: 'Activities',
       searchMode: 'has_any',
@@ -105,6 +107,7 @@ export const listingFields = [
     ],
     filterConfig: {
       indexForSearch: true,
+      showFilter: true,
       filterType: 'SelectSingleFilter',
       label: 'Boat Type',
       group: 'secondary',
@@ -133,6 +136,7 @@ export const listingFields = [
     ],
     filterConfig: {
       indexForSearch: true,
+      showFilter: true,
       filterType: 'SelectSingleFilter',
       label: 'Comfort Level',
       group: 'primary',
@@ -162,6 +166,7 @@ export const listingFields = [
     ],
     filterConfig: {
       indexForSearch: true,
+      showFilter: true,
       filterType: 'SelectSingleFilter',
       label: 'Group Size',
       group: 'secondary',
@@ -195,6 +200,7 @@ export const listingFields = [
     ],
     filterConfig: {
       indexForSearch: true,
+      showFilter: true,
       filterType: 'SelectMultipleFilter',
       label: 'Vibes',
       searchMode: 'has_any',
@@ -224,6 +230,7 @@ export const listingFields = [
     ],
     filterConfig: {
       indexForSearch: true,
+      showFilter: true,
       filterType: 'SelectMultipleFilter',
       label: 'Trip Type',
       searchMode: 'has_any',
@@ -255,6 +262,7 @@ export const listingFields = [
     ],
     filterConfig: {
       indexForSearch: true,
+      showFilter: true,
       filterType: 'SelectMultipleFilter',
       label: 'Sleeping Style',
       searchMode: 'has_any',
@@ -281,6 +289,7 @@ export const listingFields = [
     },
     filterConfig: {
       indexForSearch: true,
+      showFilter: true,
       label: 'Duration (days)',
       group: 'primary',
     },
