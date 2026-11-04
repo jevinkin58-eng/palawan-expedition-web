@@ -1365,8 +1365,8 @@ const union = (arr1, arr2, key) => {
 // Note: We don't want to expose this to production by default.
 //       If you customization relies on multiple listing types or custom listing fields, you need to change this.
 const mergeDefaultTypesAndFieldsForDebugging = isDebugging => {
-  const isDev = process.env.NODE_ENV === 'development';
-  return isDebugging && isDev;
+  // Always merge local listing fields so custom filters appear in all environments.
+  return isDebugging;
 };
 
 // Note: by default, listing types and fields are only merged if explicitly set for debugging
