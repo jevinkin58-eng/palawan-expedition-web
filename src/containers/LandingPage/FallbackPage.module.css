@@ -30,6 +30,7 @@
   padding: 24px 16px;
 }
 
+/* Decorative wave overlay at the bottom of the hero */
 .heroWave {
   position: absolute;
   bottom: -1px;
@@ -88,7 +89,7 @@
   font-size: 16px;
   line-height: 1.6;
   color: rgba(255, 255, 255, 0.9);
-  margin: 0 0 32px;
+  margin: 0 0 36px;
   max-width: 560px;
   margin-left: auto;
   margin-right: auto;
@@ -96,105 +97,6 @@
   @media (--viewportMedium) {
     font-size: 19px;
   }
-}
-
-/* Hero Search Bar */
-.heroSearchForm {
-  max-width: 560px;
-  margin: 0 auto 20px;
-}
-
-.heroSearchWrapper {
-  display: flex;
-  align-items: center;
-  background: #fff;
-  border-radius: 12px;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
-  overflow: hidden;
-  padding: 4px;
-}
-
-.heroSearchIcon {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 0 12px 0 14px;
-  color: #999;
-  flex-shrink: 0;
-}
-
-.heroSearchIcon svg {
-  width: 20px;
-  height: 20px;
-}
-
-.heroSearchInput {
-  flex: 1;
-  border: none;
-  outline: none;
-  font-size: 15px;
-  padding: 12px 4px;
-  color: #333;
-  background: transparent;
-  min-width: 0;
-
-  @media (--viewportMedium) {
-    font-size: 16px;
-    padding: 14px 4px;
-  }
-}
-
-.heroSearchInput::placeholder {
-  color: #aaa;
-}
-
-.heroSearchBtn {
-  flex-shrink: 0;
-  padding: 10px 20px;
-  background: #0e7c6b;
-  color: #fff;
-  font-size: 14px;
-  font-weight: 700;
-  border: none;
-  border-radius: 8px;
-  cursor: pointer;
-  transition: background 150ms ease;
-
-  @media (--viewportMedium) {
-    padding: 12px 28px;
-    font-size: 15px;
-  }
-}
-
-.heroSearchBtn:hover {
-  background: #0a5c50;
-}
-
-/* Quick Filter Tags */
-.heroQuickTags {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: 8px;
-  margin-top: 4px;
-}
-
-.heroTag {
-  display: inline-block;
-  padding: 6px 16px;
-  background: rgba(255, 255, 255, 0.15);
-  color: #fff;
-  font-size: 13px;
-  font-weight: 500;
-  border-radius: 20px;
-  text-decoration: none;
-  border: 1px solid rgba(255, 255, 255, 0.25);
-  transition: background 150ms ease;
-}
-
-.heroTag:hover {
-  background: rgba(255, 255, 255, 0.25);
-  color: #fff;
 }
 
 .heroCta {
@@ -251,42 +153,6 @@
   height: 140px;
   top: 40%;
   right: 15%;
-}
-
-/* ========== Trust Bar ========== */
-
-.trustBarSection {
-  background: #fff;
-  border-bottom: 1px solid #f0f0f0;
-  padding: 20px 16px;
-}
-
-.trustBarInner {
-  max-width: 960px;
-  margin: 0 auto;
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: 24px;
-
-  @media (--viewportMedium) {
-    gap: 48px;
-  }
-}
-
-.trustItem {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 13px;
-  font-weight: 600;
-  color: #555;
-  letter-spacing: 0.3px;
-}
-
-.trustItem svg {
-  color: #0e7c6b;
-  flex-shrink: 0;
 }
 
 /* ========== How It Works Section ========== */
@@ -414,9 +280,7 @@
   position: relative;
   border-radius: 12px;
   overflow: hidden;
-  background: linear-gradient(135deg, #0e7c6b, #1a9e8a);
-  padding: 36px 24px;
-  min-height: 180px;
+  min-height: 220px;
   display: flex;
   flex-direction: column;
   justify-content: flex-end;
@@ -425,43 +289,58 @@
 
   &:hover {
     transform: translateY(-4px);
-    box-shadow: 0 12px 32px rgba(14, 124, 107, 0.25);
+    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.2);
+  }
+
+  &:hover .categoryImage {
+    transform: scale(1.08);
+  }
+
+  @media (--viewportMedium) {
+    min-height: 260px;
   }
 }
 
-.categoryCard:nth-child(2) {
-  background: linear-gradient(135deg, #0a6b5c, #0e8f7c);
+.categoryImage {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 400ms ease;
 }
 
-.categoryCard:nth-child(3) {
-  background: linear-gradient(135deg, #085a4d, #0c7d6c);
+.categoryOverlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.7) 0%, rgba(0, 0, 0, 0.1) 60%, rgba(0, 0, 0, 0) 100%);
+  z-index: 1;
 }
 
-.categoryCard:nth-child(4) {
-  background: linear-gradient(135deg, #064a3f, #0a6b5c);
-}
-
-.categoryCard:nth-child(5) {
-  background: linear-gradient(135deg, #053d34, #085a4d);
-}
-
-.categoryIcon {
-  font-size: 32px;
-  margin-bottom: 12px;
+.categoryContent {
+  position: relative;
+  z-index: 2;
+  padding: 24px;
 }
 
 .categoryTitle {
-  font-size: 20px;
+  font-size: 22px;
   font-weight: 700;
   color: #fff;
   margin: 0 0 6px;
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
 }
 
 .categoryDesc {
   font-size: 13px;
-  color: rgba(255, 255, 255, 0.85);
+  color: rgba(255, 255, 255, 0.9);
   margin: 0;
   line-height: 1.5;
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.3);
 }
 
 /* ========== Featured Expeditions ========== */
@@ -551,10 +430,6 @@
   color: #0e7c6b;
 }
 
-.featuredDot {
-  color: #ccc;
-}
-
 .featuredCta {
   display: inline-block;
   padding: 12px 32px;
@@ -570,87 +445,6 @@
     background: #0e7c6b;
     color: #fff;
   }
-}
-
-/* ========== Testimonials ========== */
-
-.testimonialsSection {
-  padding: 72px 16px;
-  background: #f7faf9;
-  text-align: center;
-
-  @media (--viewportMedium) {
-    padding: 96px 24px;
-  }
-}
-
-.testimonialsGrid {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 24px;
-  max-width: 1080px;
-  margin: 0 auto;
-
-  @media (--viewportMedium) {
-    grid-template-columns: repeat(3, 1fr);
-  }
-}
-
-.testimonialCard {
-  background: #fff;
-  border-radius: 12px;
-  padding: 28px 24px;
-  text-align: left;
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
-  border: 1px solid #eee;
-}
-
-.testimonialStars {
-  display: flex;
-  gap: 2px;
-  color: #f5a623;
-  margin-bottom: 16px;
-}
-
-.testimonialText {
-  font-size: 15px;
-  line-height: 1.7;
-  color: #444;
-  margin: 0 0 20px;
-  font-style: italic;
-}
-
-.testimonialAuthor {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
-.testimonialAvatar {
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  background: linear-gradient(135deg, #0e7c6b, #1a9e8a);
-  color: #fff;
-  font-size: 16px;
-  font-weight: 700;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-}
-
-.testimonialName {
-  font-size: 14px;
-  font-weight: 700;
-  color: #1a1a2e;
-  margin: 0;
-}
-
-.testimonialTrip {
-  font-size: 12px;
-  color: #888;
-  margin: 2px 0 0;
 }
 
 /* ========== About Section ========== */
