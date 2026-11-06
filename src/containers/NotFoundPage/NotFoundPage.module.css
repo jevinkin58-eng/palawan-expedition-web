@@ -1,67 +1,103 @@
 @import '../../styles/customMediaQueries.css';
 
-/* 404 page */
+/* 404 page — Palawan branded */
 
 .root {
-  /* Expand to the available space */
   flex-grow: 1;
-
   display: flex;
   flex-direction: column;
   align-items: center;
+  justify-content: center;
+  background: linear-gradient(165deg, #063b33 0%, #0e7c6b 40%, #1a9e8a 70%, #2fbfab 100%);
+  min-height: 60vh;
+  padding: 48px 16px;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Decorative circles */
+.root::before,
+.root::after {
+  content: '';
+  position: absolute;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.05);
+  pointer-events: none;
+}
+
+.root::before {
+  width: 400px;
+  height: 400px;
+  top: -100px;
+  right: -80px;
+}
+
+.root::after {
+  width: 250px;
+  height: 250px;
+  bottom: -60px;
+  left: -50px;
 }
 
 .content {
-  max-width: 587px;
-  width: 80%;
-  margin-top: 60px;
-  margin-bottom: 60px;
-
-  @media (--viewportMedium) {
-    margin-top: 10vh;
-  }
+  max-width: 520px;
+  width: 90%;
+  position: relative;
+  z-index: 2;
+  text-align: center;
 }
 
 .number {
-  composes: marketplaceHeroTitleFontStyles from global;
-  text-align: center;
-  color: var(--marketplaceColor);
-  margin: 1px 0 0 0;
+  font-size: 120px;
+  font-weight: 800;
+  color: rgba(255, 255, 255, 0.2);
+  margin: 0;
+  line-height: 1;
+  letter-spacing: -4px;
 
   @media (--viewportMedium) {
-    margin: 0;
+    font-size: 160px;
   }
 }
 
 .heading {
-  composes: marketplaceModalTitleStyles from global;
+  font-size: 28px;
+  font-weight: 700;
+  color: #fff;
   text-align: center;
-  margin-top: 16px;
+  margin: -20px 0 16px;
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
 
   @media (--viewportMedium) {
-    margin-top: 22px;
+    font-size: 36px;
+    margin-top: -30px;
   }
 }
 
 .description {
+  font-size: 16px;
+  line-height: 1.6;
+  color: rgba(255, 255, 255, 0.85);
   text-align: center;
-  margin-bottom: 0;
+  margin: 0 0 32px;
 
   @media (--viewportMedium) {
-    margin-top: 24px;
-    margin-bottom: 0;
+    font-size: 18px;
   }
 }
 
 .searchForm {
-  max-width: 408px;
-  margin: 62px auto 0 auto;
+  max-width: 420px;
+  margin: 0 auto;
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 12px;
+  border-bottom: none;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+  overflow: hidden;
 
-  background-color: var(--colorWhite);
-  border-bottom: 4px solid var(--marketplaceColor);
-  box-shadow: var(--boxShadowNotFoundPageSearch);
-
-  @media (--viewportMedium) {
-    margin-top: 64px;
+  & input {
+    border: none;
+    padding: 16px 20px;
+    font-size: 16px;
   }
 }
