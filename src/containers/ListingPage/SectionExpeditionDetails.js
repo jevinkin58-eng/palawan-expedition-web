@@ -1,4 +1,5 @@
 import React from 'react';
+import { NamedLink } from '../../components/index.js';
 import css from './SectionExpeditionDetails.module.css';
 
 // Keys to skip — these are internal Sharetribe fields or handled elsewhere
@@ -48,9 +49,6 @@ const formatDuration = val => {
   return s ? `${s} Days` : null;
 };
 
-/**
- * Prettify a snake_case or kebab-case key into a readable label.
- */
 // Known compound words that Sharetribe Console stores without separators
 const KNOWN_WORDS = [
   'arrival', 'departure', 'location', 'time', 'price', 'buyout', 'group',
@@ -69,26 +67,19 @@ const KNOWN_WORDS = [
   'more', 'than', 'per', 'person', 'yes',
 ];
 
-/**
- * Split a run-together string like "boattype" into "boat type"
- * using a dictionary of known words (longest match first).
- */
 const splitCompoundWord = str => {
   if (!str) return str;
   const s = String(str);
-  // If it already has spaces, underscores, hyphens, or mixed case — use standard split
   if (/[\s_-]/.test(s) || /[a-z][A-Z]/.test(s)) {
     return s
       .replace(/([a-z0-9])([A-Z])/g, '$1 $2')
       .replace(/[-_]/g, ' ');
   }
-  // Try dictionary-based splitting on lowercase string
   const lower = s.toLowerCase();
   const words = [];
   let i = 0;
   while (i < lower.length) {
     let matched = false;
-    // Try longest match first
     for (let len = Math.min(lower.length - i, 15); len >= 2; len--) {
       const candidate = lower.substring(i, i + len);
       if (KNOWN_WORDS.includes(candidate)) {
@@ -99,7 +90,6 @@ const splitCompoundWord = str => {
       }
     }
     if (!matched) {
-      // Append character to last word or start new one
       if (words.length > 0) {
         words[words.length - 1] += lower[i];
       } else {
@@ -117,11 +107,6 @@ const prettifyKey = key => {
     .replace(/\b\w/g, c => c.toUpperCase());
 };
 
-/**
- * Prettify an enum value for display.
- * Unlike keys, values should NOT be dictionary-split — they are real words/names.
- * Only replace underscores/hyphens with spaces and capitalize.
- */
 const prettifyEnum = val => {
   if (val == null) return null;
   const s = String(val);
@@ -131,25 +116,58 @@ const prettifyEnum = val => {
     .replace(/\b\w/g, c => c.toUpperCase());
 };
 
-/**
- * Check if a value looks like a YYYYMMDD date.
- */
 const isDateValue = (key, val) => {
   if (typeof val !== 'string' && typeof val !== 'number') return false;
   const s = String(val);
-  return /^\d{8}$/.test(s) && (key.toLowerCase().includes('date') || parseInt(s.substring(0,4)) > 2000);
+  return /^\d{8}$/.test(s) && (key.toLowerCase().includes('date') || parseInt(s.substring(0, 4)) > 2000);
 };
 
-/**
- * Check if a key is a duration-related field.
- */
 const isDurationKey = key => {
   const k = key.toLowerCase();
   return k.includes('duration');
 };
 
 /**
- * Render a multi-enum or array field as styled tag pills.
+ * Seats Left Badge — prominent urgency indicator
+ */
+const SeatsLeftBadge = ({ seats }) => {
+  if (!seats && seats !== 0) return null;
+  const num = parseInt(seats, 10);
+  const isLow = num <= 5;
+  const badgeClass = isLow ? css.seatsLeftBadgeLow : css.seatsLeftBadge;
+
+  return (
+    <div className={badgeClass}>
+      <span className={css.seatsLeftIcon}>🎫</span>
+      <div className={css.seatsLeftContent}>
+        <span className={css.seatsLeftNumber}>{num}</span>
+        <span className={css.seatsLeftLabel}>
+          {num === 1 ? 'Seat Left' : 'Seats Left'}
+        </span>
+      </div>
+      {isLow && <span className={css.seatsLeftUrgent}>Book Now!</span>}
+    </div>
+  );
+};
+
+/**
+ * Linked Company Banner
+ */
+const LinkedCompanyBanner = ({ companyName }) => {
+  if (!companyName) return null;
+  return (
+    <div className={css.companyBanner}>
+      <span className={css.companyBannerIcon}>🏢</span>
+      <div className={css.companyBannerContent}>
+        <span className={css.companyBannerLabel}>Operated by</span>
+        <span className={css.companyBannerName}>{companyName}</span>
+      </div>
+    </div>
+  );
+};
+
+/**
+ * Tag pills for multi-enum fields.
  */
 const TagSection = ({ title, values }) => {
   if (!values || (Array.isArray(values) && values.length === 0)) return null;
@@ -207,9 +225,6 @@ const ContactRow = ({ icon, label, value, href }) => {
   );
 };
 
-/**
- * Format a single value for display based on its key and type.
- */
 const formatValue = (key, val) => {
   if (val == null || val === '') return null;
   if (isDateValue(key, val)) return formatDate(val);
@@ -221,9 +236,6 @@ const formatValue = (key, val) => {
 
 /**
  * Dynamically render all publicData fields.
- * - Arrays render as tag pill sections
- * - Single values render as info cards
- * - Grouped under "Details" and "Features & Activities"
  */
 const DynamicFields = ({ publicData, handledKeys }) => {
   const singleFields = [];
@@ -232,7 +244,6 @@ const DynamicFields = ({ publicData, handledKeys }) => {
   Object.entries(publicData).forEach(([key, val]) => {
     if (SKIP_KEYS.has(key) || handledKeys.has(key)) return;
     if (val == null || val === '') return;
-    // Skip objects that aren't arrays
     if (typeof val === 'object' && !Array.isArray(val)) return;
 
     if (Array.isArray(val)) {
@@ -280,20 +291,15 @@ const DynamicFields = ({ publicData, handledKeys }) => {
 /**
  * SectionExpeditionDetails — renders expedition-specific publicData
  * fields in a visually appealing layout for all listing types.
- *
- * Known fields (departure_date, duration, etc.) get special formatting.
- * All remaining fields are auto-rendered as info cards or tag sections.
  */
 const SectionExpeditionDetails = props => {
   const { publicData, listingType } = props;
 
   if (!publicData) return null;
 
-  // Keys that are handled explicitly and should not appear in DynamicFields
   const handledKeys = new Set();
 
   const val = key => {
-    // Try exact key, then common alternatives
     const v = publicData[key];
     if (v != null) { handledKeys.add(key); return v; }
     return null;
@@ -314,13 +320,20 @@ const SectionExpeditionDetails = props => {
     const seatsLeft = val('seats_left') || val('seatsLeft');
     const rating = val('rating');
     const comfortLevel = val('comfort_level') || val('comfortLevel');
+    const companyName = val('company_name') || val('companyName');
 
     const hasQuickInfo = departureDate || duration || expeditionType || groupSize ||
-      difficulty || seatsLeft || rating || comfortLevel;
+      difficulty || rating || comfortLevel;
     const hasInclusions = whatsIncluded || whatsNotIncluded;
 
     return (
       <div className={css.root}>
+        {/* Linked Company Banner */}
+        <LinkedCompanyBanner companyName={companyName} />
+
+        {/* Seats Left — prominent urgency badge */}
+        <SeatsLeftBadge seats={seatsLeft} />
+
         {/* Quick Info Grid */}
         {hasQuickInfo && (
           <div className={css.section}>
@@ -332,7 +345,6 @@ const SectionExpeditionDetails = props => {
               <InfoCard label="Group Size" value={groupSize ? `Up to ${groupSize} people` : null} />
               <InfoCard label="Difficulty" value={prettifyEnum(difficulty)} />
               <InfoCard label="Meeting Point" value={meetingPoint} />
-              <InfoCard label="Seats Left" value={seatsLeft} />
               <InfoCard label="Rating" value={rating} />
               <InfoCard label="Comfort Level" value={prettifyEnum(comfortLevel)} />
             </div>
@@ -467,7 +479,6 @@ const SectionExpeditionDetails = props => {
           </div>
         )}
 
-        {/* Auto-render remaining fields */}
         <DynamicFields publicData={publicData} handledKeys={handledKeys} />
 
         {hasContact && (

@@ -56,6 +56,105 @@
   }
 }
 
+/* ========== Search Bar ========== */
+
+.searchBarSection {
+  background: #fff;
+  border-bottom: 1px solid #e5e7eb;
+  padding: 16px;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+
+  @media (--viewportMedium) {
+    padding: 20px 24px;
+  }
+}
+
+.searchBarInner {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+
+  @media (--viewportMedium) {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+  }
+}
+
+.searchInputWrapper {
+  position: relative;
+  flex: 1;
+  max-width: 480px;
+}
+
+.searchInputIcon {
+  position: absolute;
+  left: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #9ca3af;
+  display: flex;
+  align-items: center;
+  pointer-events: none;
+}
+
+.searchInput {
+  width: 100%;
+  padding: 12px 40px 12px 42px;
+  border: 1px solid #d1d5db;
+  border-radius: 10px;
+  font-size: 15px;
+  color: #1a1a2e;
+  background: #f9fafb;
+  outline: none;
+  transition: border-color 150ms ease, box-shadow 150ms ease;
+
+  &::placeholder {
+    color: #9ca3af;
+  }
+
+  &:focus {
+    border-color: #0e7c6b;
+    box-shadow: 0 0 0 3px rgba(14, 124, 107, 0.1);
+    background: #fff;
+  }
+}
+
+.searchClear {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  color: #9ca3af;
+  font-size: 14px;
+  cursor: pointer;
+  padding: 4px;
+  line-height: 1;
+
+  &:hover {
+    color: #374151;
+  }
+}
+
+.searchMeta {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.resultsCount {
+  font-size: 14px;
+  color: #666;
+  margin: 0;
+  white-space: nowrap;
+}
+
 /* ========== Results ========== */
 
 .resultsSection {
@@ -66,16 +165,6 @@
   @media (--viewportMedium) {
     padding: 48px 24px 96px;
   }
-}
-
-.resultsHeader {
-  margin-bottom: 24px;
-}
-
-.resultsCount {
-  font-size: 14px;
-  color: #666;
-  margin: 0;
 }
 
 .error {
@@ -89,6 +178,11 @@
 .emptyState {
   text-align: center;
   padding: 60px 16px;
+}
+
+.emptyIcon {
+  font-size: 48px;
+  margin-bottom: 16px;
 }
 
 .emptyTitle {
@@ -113,6 +207,8 @@
   font-weight: 600;
   border-radius: 8px;
   text-decoration: none;
+  border: none;
+  cursor: pointer;
   transition: background 150ms ease;
 
   &:hover {

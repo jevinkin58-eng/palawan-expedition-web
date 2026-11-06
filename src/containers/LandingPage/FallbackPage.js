@@ -1,7 +1,10 @@
-import React from 'react';
+import React, { useState } from 'react';
 import loadable from '@loadable/component';
+import { useHistory } from 'react-router-dom';
 
 import { NamedLink } from '../../components/index.js';
+import { createResourceLocatorString } from '../../util/routes.js';
+import { useRouteConfiguration } from '../../context/routeConfigurationContext';
 
 import css from './FallbackPage.module.css';
 
@@ -9,7 +12,7 @@ const PageBuilder = loadable(() =>
   import(/* webpackChunkName: "PageBuilder" */ '../PageBuilder/PageBuilder')
 );
 
-// ─── SVG Icons for "How It Works" ─────────────────────────────────
+// ─── SVG Icons ───────────────────────────────────────────────────
 
 const SearchIcon = () => (
   <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -35,8 +38,35 @@ const AnchorIcon = () => (
   </svg>
 );
 
-// ─── Wave SVG for hero bottom ─────────────────────────────────────
+const MapPinIcon = () => (
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
+    <circle cx="12" cy="10" r="3" />
+  </svg>
+);
 
+const StarIcon = () => (
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" stroke="none">
+    <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+  </svg>
+);
+
+const ShieldIcon = () => (
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+  </svg>
+);
+
+const UsersIcon = () => (
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+    <circle cx="9" cy="7" r="4" />
+    <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
+    <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+  </svg>
+);
+
+// Wave SVG for hero bottom
 const WaveSvg = () => (
   <svg viewBox="0 0 1440 120" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
     <path
@@ -46,39 +76,111 @@ const WaveSvg = () => (
   </svg>
 );
 
-// ─── Hero Section ─────────────────────────────────────────────────
+// ─── Hero Section with Search Bar ──────────────────────────────
 
-const SectionHeroCustom = () => (
-  <section className={css.heroSection}>
-    <div className={css.heroDecor} aria-hidden="true">
-      <div className={css.heroCircle1} />
-      <div className={css.heroCircle2} />
-      <div className={css.heroCircle3} />
-    </div>
+const SectionHeroCustom = () => {
+  const [searchValue, setSearchValue] = useState('');
+  const history = useHistory();
+  const routeConfiguration = useRouteConfiguration();
 
-    <div className={css.heroContent}>
-      <p className={css.heroSubtitle}>Palawan, Philippines</p>
-      <h1 className={css.heroTitle}>
-        Your Next Great
-        <br />
-        Adventure Awaits
-      </h1>
-      <p className={css.heroDescription}>
-        Discover expedition tours, island-hopping trips, and camp stays across the
-        most beautiful islands in the Philippines. Book directly with local operators.
-      </p>
-      <NamedLink name="SearchPage" className={css.heroCta}>
-        Explore Expeditions
-      </NamedLink>
-    </div>
+  const handleSearch = e => {
+    e.preventDefault();
+    const searchParams = searchValue.trim()
+      ? { keywords: searchValue.trim() }
+      : {};
+    const path = createResourceLocatorString('SearchPage', routeConfiguration, {}, searchParams);
+    history.push(path);
+  };
 
-    <div className={css.heroWave}>
-      <WaveSvg />
+  return (
+    <section className={css.heroSection}>
+      <div className={css.heroDecor} aria-hidden="true">
+        <div className={css.heroCircle1} />
+        <div className={css.heroCircle2} />
+        <div className={css.heroCircle3} />
+      </div>
+
+      <div className={css.heroContent}>
+        <p className={css.heroSubtitle}>Palawan, Philippines</p>
+        <h1 className={css.heroTitle}>
+          Your Next Great
+          <br />
+          Adventure Awaits
+        </h1>
+        <p className={css.heroDescription}>
+          Discover expedition tours, island-hopping trips, and camp stays across the
+          most beautiful islands in the Philippines. Book directly with local operators.
+        </p>
+
+        {/* Search Bar */}
+        <form className={css.heroSearchForm} onSubmit={handleSearch}>
+          <div className={css.heroSearchWrapper}>
+            <span className={css.heroSearchIcon}>
+              <SearchIcon />
+            </span>
+            <input
+              type="text"
+              className={css.heroSearchInput}
+              placeholder="Search expeditions, diving, island hopping..."
+              value={searchValue}
+              onChange={e => setSearchValue(e.target.value)}
+            />
+            <button type="submit" className={css.heroSearchBtn}>
+              Search
+            </button>
+          </div>
+        </form>
+
+        {/* Quick Filter Tags */}
+        <div className={css.heroQuickTags}>
+          <NamedLink name="SearchPage" to={{ search: '?pub_expeditiontype=islandHopping' }} className={css.heroTag}>
+            Island Hopping
+          </NamedLink>
+          <NamedLink name="SearchPage" to={{ search: '?pub_expeditiontype=diving' }} className={css.heroTag}>
+            Diving
+          </NamedLink>
+          <NamedLink name="SearchPage" to={{ search: '?pub_expeditiontype=sailing' }} className={css.heroTag}>
+            Sailing
+          </NamedLink>
+          <NamedLink name="SearchPage" to={{ search: '?pub_expeditiontype=joinerExpedition' }} className={css.heroTag}>
+            Joiner Expeditions
+          </NamedLink>
+        </div>
+      </div>
+
+      <div className={css.heroWave}>
+        <WaveSvg />
+      </div>
+    </section>
+  );
+};
+
+// ─── Trust Bar ────────────────────────────────────────────────
+
+const SectionTrustBar = () => (
+  <section className={css.trustBarSection}>
+    <div className={css.trustBarInner}>
+      <div className={css.trustItem}>
+        <ShieldIcon />
+        <span>Secure Payments</span>
+      </div>
+      <div className={css.trustItem}>
+        <UsersIcon />
+        <span>Local Operators</span>
+      </div>
+      <div className={css.trustItem}>
+        <MapPinIcon />
+        <span>Palawan Based</span>
+      </div>
+      <div className={css.trustItem}>
+        <StarIcon />
+        <span>Verified Reviews</span>
+      </div>
     </div>
   </section>
 );
 
-// ─── How It Works ─────────────────────────────────────────────────
+// ─── How It Works ────────────────────────────────────────────
 
 const SectionHowItWorks = () => (
   <section className={css.howItWorksSection}>
@@ -124,7 +226,7 @@ const SectionHowItWorks = () => (
   </section>
 );
 
-// ─── Categories ───────────────────────────────────────────────────
+// ─── Categories ──────────────────────────────────────────────
 
 const SectionCategories = () => (
   <section className={css.categoriesSection}>
@@ -188,7 +290,7 @@ const SectionCategories = () => (
   </section>
 );
 
-// ─── Featured Expeditions (static highlight cards) ───────────────
+// ─── Featured Expeditions ────────────────────────────────────
 
 const SectionFeatured = () => (
   <section className={css.featuredSection}>
@@ -211,7 +313,7 @@ const SectionFeatured = () => (
           </p>
           <div className={css.featuredMeta}>
             <span>3 Days</span>
-            <span>•</span>
+            <span className={css.featuredDot}>·</span>
             <span>From $350/day</span>
           </div>
         </div>
@@ -229,7 +331,7 @@ const SectionFeatured = () => (
           </p>
           <div className={css.featuredMeta}>
             <span>5 Days</span>
-            <span>•</span>
+            <span className={css.featuredDot}>·</span>
             <span>From $350/day</span>
           </div>
         </div>
@@ -247,7 +349,7 @@ const SectionFeatured = () => (
           </p>
           <div className={css.featuredMeta}>
             <span>1 Day</span>
-            <span>•</span>
+            <span className={css.featuredDot}>·</span>
             <span>From $85/person</span>
           </div>
         </div>
@@ -261,7 +363,68 @@ const SectionFeatured = () => (
   </section>
 );
 
-// ─── About / Stats ────────────────────────────────────────────────
+// ─── Testimonials ────────────────────────────────────────────
+
+const SectionTestimonials = () => (
+  <section className={css.testimonialsSection}>
+    <h2 className={css.sectionTitle}>What Travelers Say</h2>
+    <p className={css.sectionSubtitle}>Real reviews from real adventurers</p>
+    <div className={css.testimonialsGrid}>
+      <div className={css.testimonialCard}>
+        <div className={css.testimonialStars}>
+          <StarIcon /><StarIcon /><StarIcon /><StarIcon /><StarIcon />
+        </div>
+        <p className={css.testimonialText}>
+          "The El Nido to Coron expedition was the highlight of our Philippines trip.
+          The crew was amazing and the islands were breathtaking!"
+        </p>
+        <div className={css.testimonialAuthor}>
+          <div className={css.testimonialAvatar}>M</div>
+          <div>
+            <p className={css.testimonialName}>Maria S.</p>
+            <p className={css.testimonialTrip}>5-Day Sailing Expedition</p>
+          </div>
+        </div>
+      </div>
+
+      <div className={css.testimonialCard}>
+        <div className={css.testimonialStars}>
+          <StarIcon /><StarIcon /><StarIcon /><StarIcon /><StarIcon />
+        </div>
+        <p className={css.testimonialText}>
+          "Best diving experience I've ever had. The Coron shipwrecks are incredible
+          and the guides knew every detail."
+        </p>
+        <div className={css.testimonialAuthor}>
+          <div className={css.testimonialAvatar}>J</div>
+          <div>
+            <p className={css.testimonialName}>James T.</p>
+            <p className={css.testimonialTrip}>Coron Shipwreck Diving</p>
+          </div>
+        </div>
+      </div>
+
+      <div className={css.testimonialCard}>
+        <div className={css.testimonialStars}>
+          <StarIcon /><StarIcon /><StarIcon /><StarIcon /><StarIcon />
+        </div>
+        <p className={css.testimonialText}>
+          "Booking was so easy and the local operator was professional from start
+          to finish. Will definitely book again!"
+        </p>
+        <div className={css.testimonialAuthor}>
+          <div className={css.testimonialAvatar}>S</div>
+          <div>
+            <p className={css.testimonialName}>Sophie L.</p>
+            <p className={css.testimonialTrip}>Island Hopping Tour</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+);
+
+// ─── About / Stats ───────────────────────────────────────────
 
 const SectionAbout = () => (
   <section className={css.aboutSection}>
@@ -295,7 +458,7 @@ const SectionAbout = () => (
   </section>
 );
 
-// ─── CTA Banner ───────────────────────────────────────────────────
+// ─── CTA Banner ──────────────────────────────────────────────
 
 const SectionCtaBanner = () => (
   <section className={css.ctaSection}>
@@ -309,15 +472,15 @@ const SectionCtaBanner = () => (
   </section>
 );
 
-// ─── Fallback page assembly ───────────────────────────────────────
+// ─── Fallback page assembly ─────────────────────────────────
 
-// These sections render as custom React components (not PageBuilder sections),
-// so we register them via the sectionComponents option.
 const customSectionComponents = {
   customHero: { component: SectionHeroCustom },
+  customTrustBar: { component: SectionTrustBar },
   customHowItWorks: { component: SectionHowItWorks },
   customCategories: { component: SectionCategories },
   customFeatured: { component: SectionFeatured },
+  customTestimonials: { component: SectionTestimonials },
   customAbout: { component: SectionAbout },
   customCtaBanner: { component: SectionCtaBanner },
 };
@@ -325,9 +488,11 @@ const customSectionComponents = {
 export const fallbackSections = () => ({
   sections: [
     { sectionType: 'customHero', sectionId: 'hero' },
+    { sectionType: 'customTrustBar', sectionId: 'trust-bar' },
     { sectionType: 'customHowItWorks', sectionId: 'how-it-works' },
     { sectionType: 'customCategories', sectionId: 'categories' },
     { sectionType: 'customFeatured', sectionId: 'featured' },
+    { sectionType: 'customTestimonials', sectionId: 'testimonials' },
     { sectionType: 'customAbout', sectionId: 'about' },
     { sectionType: 'customCtaBanner', sectionId: 'cta' },
   ],
