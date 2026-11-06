@@ -117,6 +117,105 @@
   }
 }
 
+/* ===== Hero Search Bar ===== */
+
+.heroSearchWrap {
+  max-width: 560px;
+  margin: 0 auto 20px;
+  width: 100%;
+}
+
+.heroSearchBar {
+  display: flex;
+  align-items: center;
+  background: #fff;
+  border-radius: 48px;
+  padding: 6px 6px 6px 18px;
+  text-decoration: none;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.15);
+  transition: box-shadow 200ms ease, transform 150ms ease;
+
+  &:hover {
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+    transform: translateY(-2px);
+  }
+}
+
+.heroSearchIcon {
+  flex-shrink: 0;
+  color: #999;
+  margin-right: 12px;
+}
+
+.heroSearchText {
+  flex: 1;
+  font-size: 15px;
+  color: #999;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+
+  @media (--viewportMedium) {
+    font-size: 16px;
+  }
+}
+
+.heroSearchButton {
+  flex-shrink: 0;
+  background: #0e7c6b;
+  color: #fff;
+  font-size: 14px;
+  font-weight: 700;
+  padding: 10px 24px;
+  border-radius: 40px;
+  transition: background 150ms ease;
+
+  @media (--viewportMedium) {
+    padding: 12px 28px;
+    font-size: 15px;
+  }
+}
+
+.heroSearchBar:hover .heroSearchButton {
+  background: #096b5c;
+}
+
+/* ===== Hero Quick Tags ===== */
+
+.heroTags {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 0;
+}
+
+.heroTag {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  background: rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(6px);
+  color: #fff;
+  font-size: 13px;
+  font-weight: 600;
+  border-radius: 24px;
+  text-decoration: none;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  transition: background 150ms ease, transform 150ms ease;
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.28);
+    transform: translateY(-2px);
+  }
+
+  @media (--viewportMedium) {
+    font-size: 14px;
+    padding: 9px 20px;
+  }
+}
+
 /* Floating decorative elements in hero */
 .heroDecor {
   position: absolute;
