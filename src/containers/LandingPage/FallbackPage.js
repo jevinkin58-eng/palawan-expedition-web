@@ -152,7 +152,7 @@ const SectionCategories = () => (
 
       <NamedLink name="CompaniesPage" className={css.categoryCard}>
         <img
-          src="https://images.unsplash.com/photo-1559827260159-87d04120fcf9?w=600&h=400&fit=crop&auto=format"
+          src="https://images.unsplash.com/photo-1596394516093-501ba68a0ba6?w=600&h=400&fit=crop&auto=format"
           alt="Tour operators in Palawan"
           className={css.categoryImage}
         />
@@ -225,8 +225,12 @@ const SectionFeatured = () => (
     </div>
     <div className={css.featuredGrid}>
       <div className={css.featuredCard}>
-        <div className={css.featuredImagePlaceholder}>
-          <span className={css.featuredEmoji}>🤿</span>
+        <div className={css.featuredImageWrap}>
+          <img
+            src="https://images.unsplash.com/photo-1544551763-46a013bb70d5?w=600&h=400&fit=crop&auto=format"
+            alt="Coron Shipwreck Diving"
+            className={css.featuredImg}
+          />
         </div>
         <div className={css.featuredBody}>
           <span className={css.featuredBadge}>Diving</span>
@@ -243,8 +247,12 @@ const SectionFeatured = () => (
       </div>
 
       <div className={css.featuredCard}>
-        <div className={css.featuredImagePlaceholder}>
-          <span className={css.featuredEmoji}>⛵</span>
+        <div className={css.featuredImageWrap}>
+          <img
+            src="https://images.unsplash.com/photo-1500514966906-fe245eea9344?w=600&h=400&fit=crop&auto=format"
+            alt="El Nido to Coron Expedition"
+            className={css.featuredImg}
+          />
         </div>
         <div className={css.featuredBody}>
           <span className={css.featuredBadge}>Sailing</span>
@@ -261,8 +269,12 @@ const SectionFeatured = () => (
       </div>
 
       <div className={css.featuredCard}>
-        <div className={css.featuredImagePlaceholder}>
-          <span className={css.featuredEmoji}>🏝️</span>
+        <div className={css.featuredImageWrap}>
+          <img
+            src="https://images.unsplash.com/photo-1468413253725-0d5181091126?w=600&h=400&fit=crop&auto=format"
+            alt="Secret Beach and Lagoon Tour"
+            className={css.featuredImg}
+          />
         </div>
         <div className={css.featuredBody}>
           <span className={css.featuredBadge}>Island Hopping</span>
